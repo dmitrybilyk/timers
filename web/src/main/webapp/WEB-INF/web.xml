@@ -16,6 +16,18 @@
     <url-pattern>/parent/greet</url-pattern>
   </servlet-mapping>
 
+
+  <!-- Servlets -->
+  <servlet>
+    <servlet-name>clientsService</servlet-name>
+    <servlet-class>de.hpfsc.server.ClientsServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>clientsService</servlet-name>
+    <url-pattern>/parent/clients</url-pattern>
+  </servlet-mapping>
+
   <!-- Default page to serve -->
   <welcome-file-list>
     <welcome-file>parent.html</welcome-file>

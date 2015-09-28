@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+		  http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+           version="3.0">
+
+    <servlet>
+        <servlet-name>de.hpfsc.shared GreetingService</servlet-name>
+        <servlet-class>de.hpfsc.server.GreetingServiceImpl</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>de.hpfsc.shared ClientsService</servlet-name>
+        <servlet-class>de.hpfsc.server.ClientsServiceImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>de.hpfsc.shared GreetingService</servlet-name>
+        <url-pattern>/shared/greet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>de.hpfsc.shared ClientsService</servlet-name>
+        <url-pattern>/shared/clients</url-pattern>
+    </servlet-mapping>
+</web-app>

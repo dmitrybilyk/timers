@@ -10,10 +10,14 @@ import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.LabelField;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
-import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;  
-import com.google.gwt.user.client.Element;  
-import com.google.gwt.user.client.ui.FlexTable;  
-  
+import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
+import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.ui.FlexTable;
+import de.hpfsc.shared.WhoseSessionEnum;
+import de.hpfsc.web.anticafe.ClientSessionPanel;
+import de.hpfsc.web.anticafe.WidgetRenderingExample;
+
 public class BorderLayoutExample extends LayoutContainer {  
   
   protected void onRender(Element target, int index) {  
@@ -23,13 +27,26 @@ public class BorderLayoutExample extends LayoutContainer {
     setLayout(layout);  
 //    setStyleAttribute("padding", "10px");
   
-    ContentPanel north = new ContentPanel();
+    final ContentPanel north = new ContentPanel();
+//    north.setLayout(new CenterLayout());
     north.addStyleName("content-panel");
     north.setWidth(600);
-    north.setHeight(300);
-    north.add(new LabelField("north"));
+    north.setHeight("100%");
+    Button createSessionButton = new Button("Создать сессию");
+    createSessionButton.setWidth("100%");
+    createSessionButton.setHeight(50);
+    createSessionButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
+      @Override
+      public void componentSelected(ButtonEvent ce) {
+        north.add(new ClientSessionPanel(WhoseSessionEnum.ADMIN, -1, "", "", System.currentTimeMillis(), false));
+        north.layout();
+      }
+    });
+    north.add(new WidgetRenderingExample(), new BorderLayoutData(LayoutRegion.CENTER, 350));
+
+    north.add(createSessionButton, new BorderLayoutData(LayoutRegion.SOUTH, 100));
     ContentPanel west = new ContentPanel();
-    west.setHeight("100%");
+    west.setHeight(200);
     west.setHeaderVisible(true);
     west.setHeadingHtml("Инфо");
     west.add(new LabelField("Имя пользователя здесь"));
@@ -37,7 +54,7 @@ public class BorderLayoutExample extends LayoutContainer {
 
     ContentPanel center = new ContentPanel();
     center.setHeaderVisible(true);
-    center.setHeight("100%");
+    center.setHeight(200);
     center.setWidth(500);
     center.add(new LabelField("center"));
     center.setHeadingHtml("Диапазон дат");
@@ -81,14 +98,14 @@ public class BorderLayoutExample extends LayoutContainer {
     ContentPanel east = new ContentPanel();
     east.setHeaderVisible(true);
     east.setHeadingHtml("Итоги");
-    east.setHeight("100%");
+    east.setHeight(200);
     east.add(new LabelField("east"));
     ContentPanel south = new ContentPanel();
 //    south.setWidth(600);
     south.setHeaderVisible(false);
     south.add(new LabelField("south"));
   
-    BorderLayoutData northData = new BorderLayoutData(LayoutRegion.NORTH, 300);
+    BorderLayoutData northData = new BorderLayoutData(LayoutRegion.NORTH, 400);
     north.setHeaderVisible(true);
     north.setHeadingHtml("Таймеры");
 //    northData.setCollapsible(true);
