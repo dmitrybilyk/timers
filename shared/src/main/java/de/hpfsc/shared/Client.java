@@ -1,24 +1,56 @@
 package de.hpfsc.shared;
 
+import com.extjs.gxt.ui.client.core.FastMap;
+import com.extjs.gxt.ui.client.core.FastSet;
+import com.extjs.gxt.ui.client.data.BaseModelData;
+import com.extjs.gxt.ui.client.data.BeanModelTag;
 import com.extjs.gxt.ui.client.data.ModelData;
+import com.extjs.gxt.ui.client.data.NestedModelUtil;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by dmitry on 11.07.15.
  */
-public class Client implements Serializable, Comparable, ModelData {
+public class Client implements Serializable, Comparable, BeanModelTag {
   private long id;
-  WhoseSessionEnum whoseSession;
+  WhoseSessionEnum whoseSession = WhoseSessionEnum.ADMIN;
 
   private long creationalTime;
   private String name;
-  private String comment;
+  private String comment = "";
   private long startTime;
   private long totalSum;
   private boolean isInProgress;
   private long limitTime = 1000 * 60 * 60 * 5;
   private boolean accepted;
+
+
+  public enum Fields {
+    NAME("name");
+
+    private final String fieldName;
+
+    Fields(final String fieldName) {
+      this.fieldName = fieldName;
+    }
+
+    public String getFieldName() {
+      return fieldName;
+    }
+
+    public static Fields getField(String fieldName) {
+      for (Fields field : Fields.values())
+        if (field.getFieldName().equals(fieldName))
+          return field;
+      return null;
+    }
+  }
+
 
   public Client(WhoseSessionEnum whoseSession, long id, String name, String comment, long startTime) {
     this.creationalTime = System.currentTimeMillis();
@@ -120,4 +152,29 @@ public class Client implements Serializable, Comparable, ModelData {
     }
     return -1;
   }
+
+//  @Override
+//  public <X> X get(String property) {
+//    return null;
+//  }
+//
+//  @Override
+//  public Map<String, Object> getProperties() {
+//    return null;
+//  }
+//
+//  @Override
+//  public Collection<String> getPropertyNames() {
+//    return null;
+//  }
+//
+//  @Override
+//  public <X> X remove(String property) {
+//    return null;
+//  }
+//
+//  @Override
+//  public <X> X set(String property, X value) {
+//    return null;
+//  }
 }
