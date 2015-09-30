@@ -2,6 +2,7 @@ package de.hpfsc.shared;
 
 import com.extjs.gxt.ui.client.core.FastMap;
 import com.extjs.gxt.ui.client.core.FastSet;
+import com.extjs.gxt.ui.client.data.BaseModel;
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.extjs.gxt.ui.client.data.BeanModelTag;
 import com.extjs.gxt.ui.client.data.ModelData;
@@ -16,7 +17,7 @@ import java.util.Set;
 /**
  * Created by dmitry on 11.07.15.
  */
-public class Client implements Serializable, Comparable, BeanModelTag {
+public class Client extends BaseModel implements Serializable, Comparable {
   private long id;
   WhoseSessionEnum whoseSession = WhoseSessionEnum.ADMIN;
 

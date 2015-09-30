@@ -1,21 +1,18 @@
 package de.hpfsc.web.panels;
 
 import com.extjs.gxt.ui.client.Style.LayoutRegion;
-import com.extjs.gxt.ui.client.Style.Scroll;  
-import com.extjs.gxt.ui.client.event.ButtonEvent;  
-import com.extjs.gxt.ui.client.event.SelectionListener;  
-import com.extjs.gxt.ui.client.util.Margins;  
-import com.extjs.gxt.ui.client.widget.ContentPanel;  
+import com.extjs.gxt.ui.client.event.ButtonEvent;
+import com.extjs.gxt.ui.client.event.SelectionListener;
+import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;  
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.LabelField;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
-import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.ui.FlexTable;
 import de.hpfsc.shared.WhoseSessionEnum;
 import de.hpfsc.web.anticafe.ClientSessionPanel;
+import de.hpfsc.web.anticafe.SessionsGrid;
 import de.hpfsc.web.anticafe.WidgetRenderingExample;
 
 public class BorderLayoutExample extends LayoutContainer {  
@@ -42,6 +39,7 @@ public class BorderLayoutExample extends LayoutContainer {
         north.layout();
       }
     });
+//    north.add(new SessionsGrid(), new BorderLayoutData(LayoutRegion.CENTER, 350));
     north.add(new WidgetRenderingExample(), new BorderLayoutData(LayoutRegion.CENTER, 350));
 
     north.add(createSessionButton, new BorderLayoutData(LayoutRegion.SOUTH, 100));
