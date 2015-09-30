@@ -29,7 +29,7 @@ import com.extjs.gxt.ui.client.widget.layout.FlowLayout;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Element;
-import de.hpfsc.shared.model.Stock;
+import de.hpfsc.shared.Session;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,19 +39,20 @@ public class WidgetRenderingExample extends LayoutContainer {
   @Override
   protected void onRender(Element parent, int index) {
     super.onRender(parent, index);
-    setLayout(new FlowLayout(10));
+    setHeight(300);
+//    setLayout(new FlowLayout(10));
 
-    GridCellRenderer<Stock> buttonRenderer = new GridCellRenderer<Stock>() {
+    GridCellRenderer<Session> buttonRenderer = new GridCellRenderer<Session>() {
 
       private boolean init;
 
-      public Object render(final Stock model, String property, ColumnData config, final int rowIndex,
-          final int colIndex, ListStore<Stock> store, Grid<Stock> grid) {
+      public Object render(final Session model, String property, ColumnData config, final int rowIndex,
+          final int colIndex, ListStore<Session> store, Grid<Session> grid) {
         if (!init) {
           init = true;
-          grid.addListener(Events.ColumnResize, new Listener<GridEvent<Stock>>() {
+          grid.addListener(Events.ColumnResize, new Listener<GridEvent<Session>>() {
 
-            public void handleEvent(GridEvent<Stock> be) {
+            public void handleEvent(GridEvent<Session> be) {
               for (int i = 0; i < be.getGrid().getStore().getCount(); i++) {
                 if (be.getGrid().getView().getWidget(i, be.getColIndex()) != null
                     && be.getGrid().getView().getWidget(i, be.getColIndex()) instanceof BoxComponent) {
@@ -77,20 +78,20 @@ public class WidgetRenderingExample extends LayoutContainer {
 
     final NumberFormat currency = NumberFormat.getCurrencyFormat();
     final NumberFormat number = NumberFormat.getFormat("0.00");
-//    final NumberCellRenderer<Grid<Stock>> numberRenderer = new NumberCellRenderer<Grid<Stock>>(currency);
+//    final NumberCellRenderer<Grid<Session>> numberRenderer = new NumberCellRenderer<Grid<Session>>(currency);
 
-    GridCellRenderer<Stock> change = new GridCellRenderer<Stock>() {
-      public String render(Stock model, String property, ColumnData config, int rowIndex, int colIndex,
-          ListStore<Stock> store, Grid<Stock> grid) {
+    GridCellRenderer<Session> change = new GridCellRenderer<Session>() {
+      public String render(Session model, String property, ColumnData config, int rowIndex, int colIndex,
+          ListStore<Session> store, Grid<Session> grid) {
         double val = (Double) model.get(property);
         String style = val < 0 ? "red" : "green";
         return "<span style='color:" + style + "'>" + number.format(val) + "</span>";
       }
     };
 
-//    GridCellRenderer<Stock> gridNumber = new GridCellRenderer<Stock>() {
-//      public String render(Stock model, String property, ColumnData config, int rowIndex, int colIndex,
-//          ListStore<Stock> stor, Grid<Stock> grid) {
+//    GridCellRenderer<Session> gridNumber = new GridCellRenderer<Session>() {
+//      public String render(Session model, String property, ColumnData config, int rowIndex, int colIndex,
+//          ListStore<Session> stor, Grid<Session> grid) {
 //        return numberRenderer.render(null, property, model.get(property));
 //      }
 //    };
@@ -100,14 +101,37 @@ public class WidgetRenderingExample extends LayoutContainer {
     ColumnConfig column = new ColumnConfig();
     column.setId("name");
     column.setHeaderHtml("Company");
-    column.setWidth(200);
+    column.setWidth(100);
     configs.add(column);
+
+//    column = new ColumnConfig();
+//    column.setId("name2");
+//    column.setRenderer(new ComboGridCellRenderer());
+//    column.setHeaderHtml("Имя combo");
+//    column.setWidth(50);
+//    configs.add(column);
 
     column = new ColumnConfig();
     column.setId("symbol");
     column.setHeaderHtml("Symbol");
     column.setWidth(100);
     column.setRenderer(buttonRenderer);
+    configs.add(column);
+
+    column = new ColumnConfig();
+    column.setId("last");
+    column.setHeaderHtml("Last");
+    column.setAlignment(HorizontalAlignment.RIGHT);
+    column.setWidth(75);
+//    column.setRenderer(gridNumber);
+    configs.add(column);
+
+    column = new ColumnConfig();
+    column.setId("last");
+    column.setHeaderHtml("Last");
+    column.setAlignment(HorizontalAlignment.RIGHT);
+    column.setWidth(75);
+//    column.setRenderer(gridNumber);
     configs.add(column);
 
     column = new ColumnConfig();
@@ -128,8 +152,8 @@ public class WidgetRenderingExample extends LayoutContainer {
     column.setDateTimeFormat(DateTimeFormat.getShortDateFormat());
     configs.add(column);
 
-    final ListStore<Stock> store = new ListStore<Stock>();
-    store.add(TestData.getStocks());
+    final ListStore<Session> store = new ListStore<Session>();
+    store.add(TestData.getSessions());
 
     ColumnModel cm = new ColumnModel(configs);
 
@@ -139,9 +163,10 @@ public class WidgetRenderingExample extends LayoutContainer {
     cp.setHeadingHtml("Widget Renderer Grid");
     cp.setButtonAlign(HorizontalAlignment.CENTER);
     cp.setLayout(new FitLayout());
-    cp.setSize(600, 300);
+    cp.setSize(1100, 300);
 
-    Grid<Stock> grid = new Grid<Stock>(store, cm);
+    Grid<Session> grid = new Grid<Session>(store, cm);
+//    grid.setWidth("100%");
     grid.setStyleAttribute("borderTop", "none");
     grid.setAutoExpandColumn("name");
     grid.setBorders(true);

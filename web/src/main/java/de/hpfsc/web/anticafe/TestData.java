@@ -18,6 +18,7 @@ package de.hpfsc.web.anticafe;
 //import com.extjs.gxt.samples.resources.client.model.TeamSales;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Random;
+import de.hpfsc.shared.Session;
 import de.hpfsc.shared.model.Country;
 import de.hpfsc.shared.model.Folder;
 import de.hpfsc.shared.model.MailItem;
@@ -583,6 +584,60 @@ public class TestData {
 
   }
 
+  public static List<Session> getSessions() {
+    List<Session> stocks = new ArrayList<Session>();
+
+    stocks.add(new Session("Apple Inc.", "AAPL", 125.64, 123.43));
+    stocks.add(new Session("Cisco Systems, Inc.", "CSCO", 25.84, 26.3));
+    stocks.add(new Session("Google Inc.", "GOOG", 516.2, 512.6));
+    stocks.add(new Session("Intel Corporation", "INTC", 21.36, 21.53));
+    stocks.add(new Session("Level 3 Communications, Inc.", "LVLT", 5.55, 5.54));
+    stocks.add(new Session("Microsoft Corporation", "MSFT", 29.56, 29.72));
+    stocks.add(new Session("Nokia Corporation (ADR)", "NOK", 27.83, 27.93));
+    stocks.add(new Session("Oracle Corporation", "ORCL", 18.73, 18.98));
+    stocks.add(new Session("Starbucks Corporation", "SBUX", 27.33, 27.36));
+    stocks.add(new Session("Yahoo! Inc.", "YHOO", 26.97, 27.29));
+    stocks.add(new Session("Applied Materials, Inc.", "AMAT", 18.4, 18.66));
+    stocks.add(new Session("Comcast Corporation", "CMCSA", 25.9, 26.4));
+    stocks.add(new Session("Sirius Satellite", "SIRI", 2.77, 2.74));
+
+    stocks.add(new Session("Tellabs, Inc.", "TLAB", 10.64, 10.75));
+    stocks.add(new Session("eBay Inc.", "EBAY", 30.43, 31.21));
+    stocks.add(new Session("Broadcom Corporation", "BRCM", 30.88, 30.48));
+    stocks.add(new Session("CMGI Inc.", "CMGI", 2.14, 2.13));
+    stocks.add(new Session("Amgen, Inc.", "AMGN", 56.22, 57.02));
+    stocks.add(new Session("Limelight Networks", "LLNW", 23, 22.11));
+    stocks.add(new Session("Amazon.com, Inc.", "AMZN", 72.47, 72.23));
+
+    stocks.add(new Session("E TRADE Financial Corporation", "ETFC", 24.32, 24.58));
+    stocks.add(new Session("AVANIR Pharmaceuticals", "AVNR", 3.7, 3.52));
+    stocks.add(new Session("Gemstar-TV Guide, Inc.", "GMST", 4.41, 4.55));
+    stocks.add(new Session("Akamai Technologies, Inc.", "AKAM", 43.08, 45.32));
+    stocks.add(new Session("Motorola, Inc.", "MOT", 17.74, 17.69));
+    stocks.add(new Session("Advanced Micro Devices, Inc.", "AMD", 13.77, 13.98));
+    stocks.add(new Session("General Electric Company", "GE", 36.8, 36.91));
+    stocks.add(new Session("Texas Instruments Incorporated", "TXN", 35.02, 35.7));
+    stocks.add(new Session("Qwest Communications", "Q", 9.9, 10.03));
+    stocks.add(new Session("Tyco International Ltd.", "TYC", 33.48, 33.26));
+    stocks.add(new Session("Pfizer Inc.", "PFE", 26.21, 26.19));
+    stocks.add(new Session("Time Warner Inc.", "TWX", 20.3, 20.45));
+    stocks.add(new Session("Sprint Nextel Corporation", "S", 21.85, 21.76));
+    stocks.add(new Session("Bank of America Corporation", "BAC", 49.92, 49.73));
+    stocks.add(new Session("Taiwan Semiconductor", "TSM", 10.4, 10.52));
+    stocks.add(new Session("AT&T Inc.", "T", 39.7, 39.66));
+    stocks.add(new Session("United States Steel Corporation", "X", 115.81, 114.62));
+    stocks.add(new Session("Exxon Mobil Corporation", "XOM", 81.77, 81.86));
+    stocks.add(new Session("Valero Energy Corporation", "VLO", 72.46, 72.6));
+    stocks.add(new Session("Micron Technology, Inc.", "MU", 12.02, 12.27));
+    stocks.add(new Session("Verizon Communications Inc.", "VZ", 42.5, 42.61));
+    stocks.add(new Session("Avaya Inc.", "AV", 16.96, 16.96));
+    stocks.add(new Session("The Home Depot, Inc.", "HD", 37.66, 37.79));
+
+    stocks.add(new Session("First Data Corporation", "FDC", 32.7, 32.65));
+    return stocks;
+
+  }
+  
   public static List<TeamSales> getTeamSales() {
     List<TeamSales> teamsales = new ArrayList<TeamSales>();
     for (String m : months) {

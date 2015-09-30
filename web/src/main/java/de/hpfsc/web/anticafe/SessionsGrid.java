@@ -44,17 +44,17 @@ public class SessionsGrid extends LayoutContainer {
     setHeight(300);
 //    setLayout(new FlowLayout(10));
   
-    GridCellRenderer<BeanModel> buttonRenderer = new GridCellRenderer<BeanModel>() {
+    GridCellRenderer<Client> buttonRenderer = new GridCellRenderer<Client>() {
   
       private boolean init;  
   
-      public Object render(final BeanModel model, String property, ColumnData config, final int rowIndex,
-          final int colIndex, ListStore<BeanModel> store, Grid<BeanModel> grid) {
+      public Object render(final Client model, String property, ColumnData config, final int rowIndex,
+          final int colIndex, ListStore<Client> store, Grid<Client> grid) {
         if (!init) {  
           init = true;  
-          grid.addListener(Events.ColumnResize, new Listener<GridEvent<BeanModel>>() {
+          grid.addListener(Events.ColumnResize, new Listener<GridEvent<Client>>() {
   
-            public void handleEvent(GridEvent<BeanModel> be) {
+            public void handleEvent(GridEvent<Client> be) {
               for (int i = 0; i < be.getGrid().getStore().getCount(); i++) {  
                 if (be.getGrid().getView().getWidget(i, be.getColIndex()) != null  
                     && be.getGrid().getView().getWidget(i, be.getColIndex()) instanceof BoxComponent) {  
@@ -68,7 +68,7 @@ public class SessionsGrid extends LayoutContainer {
         Button b = new Button((String) model.get(property), new SelectionListener<ButtonEvent>() {  
           @Override  
           public void componentSelected(ButtonEvent ce) {  
-            Info.display(model.<Client>getBean().getName(), "<ul><li>" + model.<Client>getBean().getName() + "</li></ul>");
+            Info.display(model.getName(), "<ul><li>" + model.getName() + "</li></ul>");
           }  
         });  
         b.setWidth(grid.getColumnModel().getColumnWidth(colIndex) - 10);  
@@ -81,19 +81,19 @@ public class SessionsGrid extends LayoutContainer {
     final NumberFormat currency = NumberFormat.getCurrencyFormat();  
     final NumberFormat number = NumberFormat.getFormat("0.00");  
   
-    GridCellRenderer<BeanModel> change = new GridCellRenderer<BeanModel>() {
-      public String render(BeanModel model, String property, ColumnData config, int rowIndex, int colIndex,
-          ListStore<BeanModel> store, Grid<BeanModel> grid) {
-        double val = model.<Client>getBean().getId();
+    GridCellRenderer<Client> change = new GridCellRenderer<Client>() {
+      public String render(Client model, String property, ColumnData config, int rowIndex, int colIndex,
+          ListStore<Client> store, Grid<Client> grid) {
+        double val = model.getId();
         String style = val < 0 ? "red" : "green";  
         return "<span style='color:" + style + "'>" + number.format(val) + "</span>";  
       }  
     };  
   
-    GridCellRenderer<BeanModel> gridNumber = new GridCellRenderer<BeanModel>() {
-      public String render(BeanModel model, String property, ColumnData config, int rowIndex, int colIndex,
-          ListStore<BeanModel> stor, Grid<BeanModel> grid) {
-        Number value = model.<Client>getBean().getId();
+    GridCellRenderer<Client> gridNumber = new GridCellRenderer<Client>() {
+      public String render(Client model, String property, ColumnData config, int rowIndex, int colIndex,
+          ListStore<Client> stor, Grid<Client> grid) {
+        Number value = model.getId();
         return currency.format(model.<Number>get(property));
       }  
     };  
@@ -103,7 +103,7 @@ public class SessionsGrid extends LayoutContainer {
     ColumnConfig column = new ColumnConfig();  
     column.setId("name2");
     column.setRenderer(new ComboGridCellRenderer());
-    column.setHeaderHtml("Имя");
+    column.setHeaderHtml("Имя combo");
     column.setWidth(50);
     configs.add(column);
 
@@ -144,7 +144,7 @@ public class SessionsGrid extends LayoutContainer {
 
     Client client = new Client();
     client.setName("test name");
-    BeanModelFactory factory = BeanModelLookup.get().getFactory(Client.class);
+//    BeanModelFactory factory = BeanModelLookup.get().getFactory(Client.class);
     List<Client> beanModels = new ArrayList<>();
 //    BeanModel model = factory.createModel(client);
 //    beanModels.add(model);
@@ -176,13 +176,13 @@ public class SessionsGrid extends LayoutContainer {
   }
 
   private ColumnConfig getSpeechTagNameColumn() {
-    GridCellRenderer<BeanModel> nameRenderer = new GridCellRenderer<BeanModel>() {
+    GridCellRenderer<Client> nameRenderer = new GridCellRenderer<Client>() {
       @Override
-      public Object render(BeanModel model, String property, ColumnData config, int rowIndex,
-                           int colIndex, ListStore<BeanModel> store, Grid<BeanModel> grid) {
+      public Object render(Client model, String property, ColumnData config, int rowIndex,
+                           int colIndex, ListStore<Client> store, Grid<Client> grid) {
 
         LayoutContainer container = new LayoutContainer();
-        container.addText(model.<Client>getBean().getName());
+        container.addText(model.getName());
         return container;
       }
     };

@@ -10,6 +10,8 @@ import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.WidgetComponent;
 import com.extjs.gxt.ui.client.widget.form.ComboBox;
+import com.extjs.gxt.ui.client.widget.form.SimpleComboBox;
+import com.extjs.gxt.ui.client.widget.form.SimpleComboValue;
 import com.extjs.gxt.ui.client.widget.grid.ColumnData;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
@@ -18,6 +20,7 @@ import com.extjs.gxt.ui.client.widget.layout.HBoxLayoutData;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Image;
 import de.hpfsc.shared.ClientNamesEnum;
+import de.hpfsc.shared.Session;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +44,7 @@ class ComboGridCellRenderer implements GridCellRenderer<BeanModel> {
   public Object render(final BeanModel model, String property, ColumnData config, final int rowIndex,
                        final int colIndex, ListStore<BeanModel> store, Grid<BeanModel> grid) {
 
-    final ComboBox<BeanModel> namesCombo = new ComboBox<BeanModel>();
+    final SimpleComboBox<String> namesCombo = new SimpleComboBox<String>();
 
     namesCombo.setDisplayField("DisplayField");
     namesCombo.setWidth(width);
@@ -53,15 +56,15 @@ class ComboGridCellRenderer implements GridCellRenderer<BeanModel> {
 
     List<String> clientNamesList = new ArrayList<>();
     for (ClientNamesEnum clientNamesEnum: ClientNamesEnum.values()) {
-      clientNamesList.add(clientNamesEnum.name());
+      namesCombo.add(clientNamesEnum.name());
     }
 
-    List<BeanModel> answerList = factory.createModel(clientNamesList);
+//    List<Session> answerList = factory.createModel(clientNamesList);
 
-    ListStore<BeanModel> answerComboStore = new ListStore<BeanModel>();
-    answerComboStore.setSortField("");
-    answerComboStore.add(answerList);
-    namesCombo.setStore(answerComboStore);
+//    ListStore<String> answerComboStore = new ListStore<String>();
+//    answerComboStore.setSortField("");
+//    answerComboStore.add(clientNamesList);
+//    namesCombo.setStore(answerComboStore);
 
     LayoutContainer container = new LayoutContainer();
     HBoxLayout layout = new HBoxLayout();
