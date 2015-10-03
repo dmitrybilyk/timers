@@ -22,7 +22,7 @@ public interface ClientsService extends RemoteService {
 
   void updateSessionOwner(long id, WhoseSessionEnum whoseSession);
 
-  void stopSession(long id);
+  void stopSession(long id, long totalSum);
 
   void acceptSession(long id);
 

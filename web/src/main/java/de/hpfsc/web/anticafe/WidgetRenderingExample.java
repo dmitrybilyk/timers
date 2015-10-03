@@ -20,11 +20,14 @@ import com.extjs.gxt.ui.client.widget.Info;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.LabelField;
+import com.extjs.gxt.ui.client.widget.grid.AggregationRenderer;
+import com.extjs.gxt.ui.client.widget.grid.AggregationRowConfig;
 import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
 import com.extjs.gxt.ui.client.widget.grid.ColumnData;
 import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
+import com.extjs.gxt.ui.client.widget.grid.SummaryType;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.layout.FlowLayout;
 import com.google.gwt.core.client.GWT;
@@ -53,7 +56,7 @@ public class WidgetRenderingExample extends LayoutContainer {
   protected void onRender(Element parent, int index) {
     super.onRender(parent, index);
     setHeight(300);
-    Timer updateClientsTimer = new Timer() {
+    final Timer updateClientsTimer = new Timer() {
       @Override
       public void run() {
         clientsServiceAsync.getClients(new AsyncCallback<ArrayList<Client>>() {
@@ -74,15 +77,26 @@ public class WidgetRenderingExample extends LayoutContainer {
 //                }
 //              }
 //            }
-            store.removeAll();
-            store.add(clients);
-//            for (Client client: clients) {
-//              for (Client gridClient: store.getModels()) {
-//                if (client.getId() == gridClient.getId()) {
-//                  gridClient.setName(gridClient.getName()+"-");
-//                }
-//              }
-//            }
+//            store.removeAll();
+//            store.add(clients);
+            for (Client client: clients) {
+              Client alreadyPresentModel = store.findModel(client);
+              if (alreadyPresentModel == null) {
+                store.add(client);
+              } else {
+                alreadyPresentModel.setName(client.getName());
+                alreadyPresentModel.setComment(client.getComment());
+                alreadyPresentModel.setTotalSum(client.getTotalSum());
+                alreadyPresentModel.setWhoseSession(client.getWhoseSession());
+                alreadyPresentModel.setAccepted(client.isAccepted());
+                alreadyPresentModel.setCreationalTime(client.getCreationalTime());
+                alreadyPresentModel.setInProgress(client.isInProgress());
+                alreadyPresentModel.setStartTime(client.getStartTime());
+                alreadyPresentModel.setStopTime(client.getStopTime());
+                alreadyPresentModel.setLimitTime(client.getLimitTime());
+                store.update(alreadyPresentModel);
+              }
+            }
           }
 
         });
@@ -90,7 +104,7 @@ public class WidgetRenderingExample extends LayoutContainer {
 
       }
     };
-    updateClientsTimer.scheduleRepeating(1000);
+
 //    setLayout(new FlowLayout(10));
 
 
@@ -176,7 +190,7 @@ public class WidgetRenderingExample extends LayoutContainer {
         Button b = new Button("Stop", new SelectionListener<ButtonEvent>() {
           @Override
           public void componentSelected(ButtonEvent ce) {
-            clientsServiceAsync.stopSession(model.getId(), new AsyncCallback<Void>() {
+            clientsServiceAsync.stopSession(model.getId(), model.getTotalSum(), new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable throwable) {
                 System.out.println("fail stop");
@@ -217,6 +231,19 @@ public class WidgetRenderingExample extends LayoutContainer {
 
 
         return timeLabel;
+      }
+    };
+
+    GridCellRenderer<Client> sumRenderer = new GridCellRenderer<Client>() {
+
+      public Object render(final Client model, String property, ColumnData config, final int rowIndex,
+                           final int colIndex, ListStore<Client> store, Grid<Client> grid) {
+        LabelField sumLabel = new LabelField("00.00");
+
+        if (model.getStartTime() != 0 && !model.isAccepted()) {
+          renderSumeLabel(model, sumLabel);
+        }
+        return sumLabel;
       }
     };
 
@@ -310,6 +337,14 @@ public class WidgetRenderingExample extends LayoutContainer {
     configs.add(column);
 
     column = new ColumnConfig();
+    column.setId("sum");
+    column.setResizable(false);
+    column.setHeaderHtml("Деньги");
+    column.setWidth(60);
+    column.setRenderer(sumRenderer);
+    configs.add(column);
+
+    column = new ColumnConfig();
     column.setId("edit");
     column.setResizable(false);
     column.setHeaderHtml("Редактировать");
@@ -360,12 +395,51 @@ public class WidgetRenderingExample extends LayoutContainer {
       @Override
       public void onSuccess(ArrayList<Client> clients) {
         store.add(clients);
+        updateClientsTimer.scheduleRepeating(1000);
       }
     });
 
 //    store.add(TestData.getSessions());
 
     ColumnModel cm = new ColumnModel(configs);
+
+    AggregationRowConfig<Client> averages = new AggregationRowConfig<Client>();
+    averages.setHtml("totalSum", "Sum");
+
+    // with summary type and format
+    averages.setSummaryType("sum", SummaryType.SUM);
+    averages.setSummaryFormat("sum", NumberFormat.getCurrencyFormat());
+
+    // with renderer
+    averages.setSummaryType("sum", SummaryType.SUM);
+    averages.setRenderer("sum", new AggregationRenderer<Client>() {
+      public Object render(Number value, int colIndex, Grid<Client> grid, ListStore<Client> store) {
+        // you can return html here
+        if (value != null) {
+          return number.format(value.doubleValue());
+        }
+        return "";
+      }
+    });
+    cm.addAggregationRow(averages);
+
+    averages = new AggregationRowConfig<Client>();
+    averages.setHtml("name", "Maximum");
+
+
+    averages.setSummaryType("sum", SummaryType.SUM);
+    averages.setSummaryFormat("sum", NumberFormat.getCurrencyFormat());
+
+    averages.setSummaryType("sum", SummaryType.SUM);
+    averages.setRenderer("sum", new AggregationRenderer<Client>() {
+      public Object render(Number value, int colIndex, Grid<Client> grid, ListStore<Client> store) {
+        if(value != null) {
+          return number.format(value.doubleValue());
+        }
+        return "";
+      }
+    });
+    cm.addAggregationRow(averages);
 
     ContentPanel cp = new ContentPanel();
     cp.setBodyBorder(false);
@@ -384,6 +458,55 @@ public class WidgetRenderingExample extends LayoutContainer {
     cp.add(grid);
 
     add(cp);
+  }
+
+  private void renderSumeLabel(Client model, LabelField sumLabel) {
+    Long minTime = 60000l; // minimum period 1 minutes
+    Long minPayment = 3500l;
+    Long stopTime = model.getStopTime();
+    Long endTime = null;
+    if (!model.isInProgress() && stopTime != 0) {
+      endTime = stopTime;
+    } else if (model.isInProgress()) {
+      endTime = System.currentTimeMillis();
+    }
+    Long currentTimeValue = endTime - model.getStartTime();
+//        totalTimeValue.setText(getMinutesString(currentTimeValue));
+    long currentIntervalSeconds = getSeconds(currentTimeValue);
+    //TODO
+//    if (currentIntervalSeconds > maxLength/1000) {
+//      stopSession();
+//      stopSessionOnServer();
+//      return;
+//    }
+
+    if (currentIntervalSeconds <= getSeconds(minTime)) {
+//          totalSumCurrentValue = minPayment;
+
+      sumLabel.setValue(getPrettyMoney(minPayment));
+//          totalSumCurrentValue = minPayment;
+    } else {
+//          if ((currentIntervalSeconds - minTime / 1000) % 60 == 0) {
+
+//            BigDecimal totalSum = BigDecimal.valueOf(totalSumCurrentValue + 50);
+//            totalSumCurrentValue = totalSum.longValue();
+        long totalSum = minPayment + 50 * (currentIntervalSeconds - minTime / 1000) / 60;
+//            totalSumCurrentValue = totalSum;
+        sumLabel.setValue(getPrettyMoney(totalSum));
+//          }
+    }
+    model.setTotalSum(minPayment);
+    clientsServiceAsync.updateClient(model, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+        System.out.println("fail update client");
+      }
+
+      @Override
+      public void onSuccess(Void aVoid) {
+        System.out.println("client is updated");
+      }
+    });
   }
 
   private void toggleInprogressButtonStyle(Client model, Button b) {
@@ -420,7 +543,5 @@ public class WidgetRenderingExample extends LayoutContainer {
   private String padTimeValue(long timeUnit) {
     return timeUnit<10 ? "0"+timeUnit : String.valueOf(timeUnit);
   }
-
-
 
 }

@@ -64,10 +64,16 @@ public class CustomFormExample extends LayoutContainer {
   FormPanel simple;
   private ClientsServiceAsync clientsServiceAsync = GWT.create(ClientsService.class);
 
-  public CustomFormExample(Client session) {
-    this.currentClient = session;
-//    simpleNameCombo.get
-    simpleNameCombo.setSimpleValue(ClientNamesEnum.valueOf(currentClient.getName()).name());
+  public CustomFormExample(Client client) {
+    this.currentClient = client;
+    for (WhoseSessionEnum whoseSessionEnum: WhoseSessionEnum.values()) {
+      simpleOwnerCombo.add(whoseSessionEnum.name());
+    }
+    simpleNameCombo.setTriggerAction(TriggerAction.ALL);
+    for (ClientNamesEnum clientName: ClientNamesEnum.values()) {
+      simpleNameCombo.add(clientName.name());
+    }
+    simpleNameCombo.setSimpleValue(currentClient.getName());
     comment.setValue(currentClient.getComment());
     simpleOwnerCombo.setSimpleValue(currentClient.getWhoseSession().name());
   }
@@ -105,17 +111,17 @@ public class CustomFormExample extends LayoutContainer {
 
 
     simpleOwnerCombo.setFieldLabel("Кому принадлежит");
-    for (WhoseSessionEnum whoseSessionEnum: WhoseSessionEnum.values()) {
-      simpleOwnerCombo.add(whoseSessionEnum.name());
-    }
+//    for (WhoseSessionEnum whoseSessionEnum: WhoseSessionEnum.values()) {
+//      simpleOwnerCombo.add(whoseSessionEnum.name());
+//    }
     simpleOwnerCombo.setSimpleValue(WhoseSessionEnum.ADMIN.name());
     simple.add(simpleOwnerCombo);
 
 
     simpleNameCombo.setFieldLabel("Псевдоним");
-    for (ClientNamesEnum clientName: ClientNamesEnum.values()) {
-      simpleNameCombo.add(clientName.name());
-    }
+//    for (ClientNamesEnum clientName: ClientNamesEnum.values()) {
+//      simpleNameCombo.add(clientName.name());
+//    }
     simple.add(simpleNameCombo);
 
 

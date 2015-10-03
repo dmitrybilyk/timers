@@ -187,4 +187,21 @@ public class Client extends BaseModel implements Serializable, Comparable {
 //  public <X> X set(String property, X value) {
 //    return null;
 //  }
+
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Client client = (Client) o;
+
+    return id.equals(client.id);
+
+  }
+
+  @Override
+  public int hashCode() {
+    return id.hashCode();
+  }
 }

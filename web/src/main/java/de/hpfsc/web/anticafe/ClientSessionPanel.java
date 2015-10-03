@@ -249,7 +249,7 @@ public class ClientSessionPanel extends Composite {
     stopSessionButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         stopSession();
-        clientsServiceAsync.stopSession(clientId, new AsyncCallback<Void>() {
+        clientsServiceAsync.stopSession(clientId, 0, new AsyncCallback<Void>() {
           public void onFailure(Throwable caught) {
             String s = "sdfsd";
           }
@@ -454,7 +454,7 @@ public class ClientSessionPanel extends Composite {
   }
 
   public void stopSessionOnServer() {
-    clientsServiceAsync.stopSession(clientId, new AsyncCallback<Void>() {
+    clientsServiceAsync.stopSession(clientId, 0, new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) {
         String s = "dfdsf";
       }
