@@ -33,8 +33,8 @@ public class DialogExample extends Window {
   public DialogExample(Session session) {
     setModal(true);
     setHeadingHtml("Создание сессии");
-    setSize(370, 440);
-    setScrollMode(Scroll.AUTOY);
+    setSize(380, 440);
+//    setScrollMode(Scroll.AUTOY);
 
     add(new CustomFormExample(session));
 //

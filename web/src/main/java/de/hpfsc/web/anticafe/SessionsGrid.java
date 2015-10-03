@@ -92,7 +92,7 @@ public class SessionsGrid extends LayoutContainer {
   
     GridCellRenderer<Client> gridNumber = new GridCellRenderer<Client>() {
       public String render(Client model, String property, ColumnData config, int rowIndex, int colIndex,
-          ListStore<Client> stor, Grid<Client> grid) {
+          ListStore<Client> store, Grid<Client> grid) {
         Number value = model.getId();
         return currency.format(model.<Number>get(property));
       }  
