@@ -172,10 +172,21 @@ public class WidgetRenderingExample extends LayoutContainer {
 
       public Object render(final Client model, String property, ColumnData config, final int rowIndex,
                            final int colIndex, ListStore<Client> store, Grid<Client> grid) {
+        final Client selectedItem = store.getAt(rowIndex);
         Button b = new Button("Stop", new SelectionListener<ButtonEvent>() {
           @Override
           public void componentSelected(ButtonEvent ce) {
-            Info.display(model.getName(), "<ul><li>" + model.getId() + "</li></ul>");
+            clientsServiceAsync.stopSession(model.getId(), new AsyncCallback<Void>() {
+              @Override
+              public void onFailure(Throwable throwable) {
+                System.out.println("fail stop");
+              }
+
+              @Override
+              public void onSuccess(Void aVoid) {
+                Info.display("Stop alert", selectedItem.getName() + " is stopped");
+              }
+            });
           }
         });
         b.setWidth(grid.getColumnModel().getColumnWidth(colIndex) - 10);
@@ -190,11 +201,45 @@ public class WidgetRenderingExample extends LayoutContainer {
       public Object render(final Client model, String property, ColumnData config, final int rowIndex,
                            final int colIndex, ListStore<Client> store, Grid<Client> grid) {
         LabelField timeLabel = new LabelField();
-        Long currentTime = System.currentTimeMillis();
-        timeLabel.setValue(getMinutesString(currentTime - model.getStartTime()));
+        Long stopTime = model.getStopTime();
+
+        Long endTime = null;
+
+        if (!model.isInProgress() && stopTime != 0) {
+          endTime = stopTime;
+          timeLabel.setValue(getMinutesString(endTime - model.getStartTime()));
+        } else if (model.isInProgress()) {
+          endTime = System.currentTimeMillis();
+          timeLabel.setValue(getMinutesString(endTime - model.getStartTime()));
+        } else {
+          timeLabel.setValue("00:00:00");
+        }
+
+
         return timeLabel;
       }
     };
+
+    GridCellRenderer<Client> editButtonRenderer = new GridCellRenderer<Client>() {
+
+      public Object render(final Client model, String property, ColumnData config, final int rowIndex,
+                           final int colIndex, ListStore<Client> store, Grid<Client> grid) {
+        final Client selectedItem = store.getAt(rowIndex);
+        Button b = new Button("Редактировать", new SelectionListener<ButtonEvent>() {
+          @Override
+          public void componentSelected(ButtonEvent ce) {
+            DialogExample dialogExample = new DialogExample(model);
+            dialogExample.show();
+          }
+        });
+        b.setWidth(grid.getColumnModel().getColumnWidth(colIndex) - 10);
+        b.setToolTip("Click for more information");
+
+        return b;
+      }
+    };
+
+
 
     final NumberFormat currency = NumberFormat.getCurrencyFormat();
     final NumberFormat number = NumberFormat.getFormat("0.00");
@@ -263,6 +308,15 @@ public class WidgetRenderingExample extends LayoutContainer {
     column.setWidth(60);
     column.setRenderer(timeRenderer);
     configs.add(column);
+
+    column = new ColumnConfig();
+    column.setId("edit");
+    column.setResizable(false);
+    column.setHeaderHtml("Редактировать");
+    column.setWidth(80);
+    column.setRenderer(editButtonRenderer);
+    configs.add(column);
+
 //    column = new ColumnConfig();
 //    column.setId("last");
 //    column.setHeaderHtml("Last");
@@ -364,7 +418,7 @@ public class WidgetRenderingExample extends LayoutContainer {
   }
 
   private String padTimeValue(long timeUnit) {
-    return timeUnit<10? "0"+timeUnit: String.valueOf(timeUnit);
+    return timeUnit<10 ? "0"+timeUnit : String.valueOf(timeUnit);
   }
 
 

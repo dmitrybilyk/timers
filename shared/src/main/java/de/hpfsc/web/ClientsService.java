@@ -27,4 +27,6 @@ public interface ClientsService extends RemoteService {
   void acceptSession(long id);
 
   void startSession(long id, long startTime);
+
+  void updateClient(Client client);
 }

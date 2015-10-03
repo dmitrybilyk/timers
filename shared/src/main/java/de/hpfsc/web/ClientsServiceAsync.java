@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 public interface ClientsServiceAsync {
   void addClient(WhoseSessionEnum whoseSessionEnum, long id, String name, String comment, long startTime, long totalSum, AsyncCallback<Long> async);
+  void updateClient(Client client, AsyncCallback<Void> async);
   void addSession(long id, String name, String comment, long totalTime, long totalSum, AsyncCallback<Void> async);
   void updateSession(long id, String name, String comment, AsyncCallback<Void> async);
   void updateSessionOwner(long id, WhoseSessionEnum whoseSession, AsyncCallback<Void> async);

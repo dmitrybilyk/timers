@@ -16,7 +16,8 @@ import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.Component;  
-import com.extjs.gxt.ui.client.widget.ComponentPlugin;  
+import com.extjs.gxt.ui.client.widget.ComponentPlugin;
+import com.extjs.gxt.ui.client.widget.Info;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.Slider;
@@ -31,6 +32,7 @@ import com.extjs.gxt.ui.client.widget.form.FormPanel;
 import com.extjs.gxt.ui.client.widget.form.Radio;  
 import com.extjs.gxt.ui.client.widget.form.RadioGroup;
 import com.extjs.gxt.ui.client.widget.form.SimpleComboBox;
+import com.extjs.gxt.ui.client.widget.form.SimpleComboValue;
 import com.extjs.gxt.ui.client.widget.form.SliderField;
 import com.extjs.gxt.ui.client.widget.form.TextArea;  
 import com.extjs.gxt.ui.client.widget.form.TextField;  
@@ -41,6 +43,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
+import de.hpfsc.shared.Client;
+import de.hpfsc.shared.ClientName;
 import de.hpfsc.shared.ClientNamesEnum;
 import de.hpfsc.shared.Session;
 import de.hpfsc.shared.WhoseSessionEnum;
@@ -53,11 +57,19 @@ public class CustomFormExample extends LayoutContainer {
     
   private VerticalPanel vp;  
   private FormData formData;
-  private Session currentSession;
+  private Client currentClient;
+  final SimpleComboBox<String> simpleNameCombo = new SimpleComboBox<>();
+  final TextArea comment = new TextArea();
+  final SimpleComboBox<String> simpleOwnerCombo = new SimpleComboBox<>();
+  FormPanel simple;
   private ClientsServiceAsync clientsServiceAsync = GWT.create(ClientsService.class);
 
-  public CustomFormExample(Session session) {
-    this.currentSession = session;
+  public CustomFormExample(Client session) {
+    this.currentClient = session;
+//    simpleNameCombo.get
+    simpleNameCombo.setSimpleValue(ClientNamesEnum.valueOf(currentClient.getName()).name());
+    comment.setValue(currentClient.getComment());
+    simpleOwnerCombo.setSimpleValue(currentClient.getWhoseSession().name());
   }
 
   @Override  
@@ -71,7 +83,7 @@ public class CustomFormExample extends LayoutContainer {
   }  
   
   private void createForm1() {  
-    FormPanel simple = new FormPanel();
+    simple = new FormPanel();
 
     simple.setHeaderVisible(false);
     simple.setFrame(false);
@@ -91,7 +103,7 @@ public class CustomFormExample extends LayoutContainer {
     };
 
 
-    final SimpleComboBox<String> simpleOwnerCombo = new SimpleComboBox<>();
+
     simpleOwnerCombo.setFieldLabel("Кому принадлежит");
     for (WhoseSessionEnum whoseSessionEnum: WhoseSessionEnum.values()) {
       simpleOwnerCombo.add(whoseSessionEnum.name());
@@ -99,14 +111,14 @@ public class CustomFormExample extends LayoutContainer {
     simpleOwnerCombo.setSimpleValue(WhoseSessionEnum.ADMIN.name());
     simple.add(simpleOwnerCombo);
 
-    final SimpleComboBox<String> simpleNameCombo = new SimpleComboBox<>();
+
     simpleNameCombo.setFieldLabel("Псевдоним");
     for (ClientNamesEnum clientName: ClientNamesEnum.values()) {
       simpleNameCombo.add(clientName.name());
     }
     simple.add(simpleNameCombo);
 
-    final TextArea comment = new TextArea();
+
     comment.setFieldLabel("Комментарий");
     comment.setEmptyText("Введите комментарий");
     simple.add(comment, formData);
@@ -220,20 +232,42 @@ public class CustomFormExample extends LayoutContainer {
     saveButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
       @Override
       public void componentSelected(ButtonEvent ce) {
-        clientsServiceAsync.addClient(WhoseSessionEnum.valueOf(simpleOwnerCombo.getValue().getValue()), 0,
-                simpleNameCombo.getValue().getValue(), comment.getValue(), 0, 0, new AsyncCallback<Long>() {
-          @Override
-          public void onFailure(Throwable throwable) {
-            System.out.println("fail");
-          }
+        if (currentClient.getId() == null) {
+          clientsServiceAsync.addClient(WhoseSessionEnum.valueOf(simpleOwnerCombo.getValue().getValue()), 0,
+                  simpleNameCombo.getValue().getValue(), comment.getValue(), 0, 0, new AsyncCallback<Long>() {
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                      System.out.println("fail");
+                    }
 
-          @Override
-          public void onSuccess(Long result) {
-            RootPanel.get().clear();
-            RootPanel.get().add(new BasicTabExample());
-            System.out.println(result);
-          }
-        });
+                    @Override
+                    public void onSuccess(Long result) {
+                      RootPanel.get().clear();
+                      RootPanel.get().add(new BasicTabExample());
+                      System.out.println(result);
+                    }
+                  });
+        } else {
+          final Client updatedClient = new Client();
+          updatedClient.setId(currentClient.getId());
+          updatedClient.setName(simpleNameCombo.getValue().getValue());
+          updatedClient.setComment(comment.getValue());
+          updatedClient.setWhoseSession(WhoseSessionEnum.valueOf(simpleOwnerCombo.getValue().getValue()));
+          clientsServiceAsync.updateClient(updatedClient, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable throwable) {
+              System.out.println("fail update");
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+              RootPanel.get().clear();
+              RootPanel.get().add(new BasicTabExample());
+              Info.display("Updated", "client " + updatedClient.getName() + " is updated");
+            }
+          });
+        }
+
       }
     });
     simple.addButton(saveButton);

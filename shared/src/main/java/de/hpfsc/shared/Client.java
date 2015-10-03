@@ -18,10 +18,11 @@ import java.util.Set;
  * Created by dmitry on 11.07.15.
  */
 public class Client extends BaseModel implements Serializable, Comparable {
-  private long id;
+  private Long id;
   WhoseSessionEnum whoseSession = WhoseSessionEnum.ADMIN;
 
   private long creationalTime;
+  private Long stopTime = (long) 0;
   private String name;
   private String comment = "";
   private long startTime;
@@ -66,11 +67,11 @@ public class Client extends BaseModel implements Serializable, Comparable {
   public Client() {
   }
 
-  public long getId() {
+  public Long getId() {
     return id;
   }
 
-  public void setId(long id) {
+  public void setId(Long id) {
     this.id = id;
   }
 
@@ -136,6 +137,14 @@ public class Client extends BaseModel implements Serializable, Comparable {
 
   public void setCreationalTime(long creationalTime) {
     this.creationalTime = creationalTime;
+  }
+
+  public long getStopTime() {
+    return stopTime;
+  }
+
+  public void setStopTime(long stopTime) {
+    this.stopTime = stopTime;
   }
 
   public WhoseSessionEnum getWhoseSession() {

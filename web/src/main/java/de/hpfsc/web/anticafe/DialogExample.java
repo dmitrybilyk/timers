@@ -22,6 +22,7 @@ import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
 import com.extjs.gxt.ui.client.widget.layout.FlowData;
 import com.google.gwt.user.client.Element;
+import de.hpfsc.shared.Client;
 import de.hpfsc.shared.Session;
 
 public class DialogExample extends Window {
@@ -30,13 +31,13 @@ public class DialogExample extends Window {
   private Button saveButton;
   private Button cancelButton;
 
-  public DialogExample(Session session) {
+  public DialogExample(Client client) {
     setModal(true);
     setHeadingHtml("Создание сессии");
     setSize(380, 440);
 //    setScrollMode(Scroll.AUTOY);
 
-    add(new CustomFormExample(session));
+    add(new CustomFormExample(client));
 //
 //    saveButton = new Button("Сохранить");
 //    cancelButton = new Button("Отмена");
