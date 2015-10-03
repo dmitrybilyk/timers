@@ -75,6 +75,9 @@ public class parent implements EntryPoint {
 //    RootPanel.get().add(centerPanel);
 //    RootPanel.get().add(new BorderLayoutExample());
     RootPanel.get().add(new BasicTabExample());
+//    DialogBox dialogBox2 = new DialogBox();
+//    dialogBox2.show();
+//    RootPanel.get().add(new DialogBox());
 
     // Focus the cursor on the name field when the app loads
     nameField.setFocus(true);

@@ -10,8 +10,10 @@ import com.extjs.gxt.ui.client.widget.form.LabelField;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
 import com.google.gwt.user.client.Element;
+import de.hpfsc.shared.Session;
 import de.hpfsc.shared.WhoseSessionEnum;
 import de.hpfsc.web.anticafe.ClientSessionPanel;
+import de.hpfsc.web.anticafe.DialogExample;
 import de.hpfsc.web.anticafe.SessionsGrid;
 import de.hpfsc.web.anticafe.WidgetRenderingExample;
 
@@ -35,8 +37,12 @@ public class BorderLayoutExample extends LayoutContainer {
     createSessionButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
       @Override
       public void componentSelected(ButtonEvent ce) {
-        north.add(new ClientSessionPanel(WhoseSessionEnum.ADMIN, -1, "", "", System.currentTimeMillis(), false));
-        north.layout();
+        DialogExample dialogExample = new DialogExample(new Session());
+//        dialogExample.setWidth(300);
+//        dialogExample.setHeight(200);
+        dialogExample.show();
+//        north.add(new ClientSessionPanel(WhoseSessionEnum.ADMIN, -1, "", "", System.currentTimeMillis(), false));
+//        north.layout();
       }
     });
 //    north.add(new SessionsGrid(), new BorderLayoutData(LayoutRegion.CENTER, 350));
