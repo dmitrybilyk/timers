@@ -10,6 +10,7 @@ package de.hpfsc.web.anticafe;
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.Events;
+import com.extjs.gxt.ui.client.event.FieldEvent;
 import com.extjs.gxt.ui.client.event.GridEvent;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.SelectionListener;
@@ -19,7 +20,9 @@ import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.Info;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.button.Button;
+import com.extjs.gxt.ui.client.widget.form.ComboBox;
 import com.extjs.gxt.ui.client.widget.form.LabelField;
+import com.extjs.gxt.ui.client.widget.form.SimpleComboBox;
 import com.extjs.gxt.ui.client.widget.grid.AggregationRenderer;
 import com.extjs.gxt.ui.client.widget.grid.AggregationRowConfig;
 import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
@@ -30,6 +33,8 @@ import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
 import com.extjs.gxt.ui.client.widget.grid.SummaryType;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.layout.FlowLayout;
+import com.extjs.gxt.ui.client.widget.toolbar.LabelToolItem;
+import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -49,7 +54,7 @@ import java.util.List;
 public class WidgetRenderingExample extends LayoutContainer {
 
   private  Grid<Client> grid;
-  final ListStore<Client> store = new ListStore<Client>();;
+  final ListStore<Client> store = new ListStore<Client>();
   private ClientsServiceAsync clientsServiceAsync = GWT.create(ClientsService.class);
 
   @Override
@@ -106,6 +111,14 @@ public class WidgetRenderingExample extends LayoutContainer {
     };
 
 //    setLayout(new FlowLayout(10));
+
+    GridCellRenderer<Client> ownerCellRenderer = new GridCellRenderer<Client>() {
+
+      public Object render(final Client model, String property, ColumnData config, final int rowIndex,
+                           final int colIndex, ListStore<Client> store, Grid<Client> grid) {
+        return new LabelField(model.getWhoseSession().name());
+      }
+    };
 
 
     GridCellRenderer<Client> nameCellRenderer = new GridCellRenderer<Client>() {
@@ -247,6 +260,39 @@ public class WidgetRenderingExample extends LayoutContainer {
       }
     };
 
+
+    GridCellRenderer<Client> acceptButtonRenderer = new GridCellRenderer<Client>() {
+
+      public Object render(final Client model, String property, ColumnData config, final int rowIndex,
+                           final int colIndex, final ListStore<Client> store, final Grid<Client> grid) {
+        final Button b = new Button("Принять", new SelectionListener<ButtonEvent>() {
+          @Override
+          public void componentSelected(ButtonEvent ce) {
+//            final Client selectedItem = grid.getSelectionModel().getSelectedItem();
+            final Client selectedItem = store.getAt(rowIndex);
+            clientsServiceAsync.acceptSession(selectedItem.getId(), new AsyncCallback<Void>() {
+              @Override
+              public void onFailure(Throwable throwable) {
+                System.out.println("faile start");
+              }
+
+              @Override
+              public void onSuccess(Void aVoid) {
+                Info.display("Session ", selectedItem.getName() + " is accepted");
+              }
+            });
+            Info.display("", selectedItem.getName());
+          }
+        });
+        toggleInprogressButtonStyle(model, b);
+        b.setWidth(grid.getColumnModel().getColumnWidth(colIndex) - 10);
+        b.setToolTip("Click for more information");
+
+        return b;
+      }
+    };
+
+
     GridCellRenderer<Client> editButtonRenderer = new GridCellRenderer<Client>() {
 
       public Object render(final Client model, String property, ColumnData config, final int rowIndex,
@@ -265,6 +311,38 @@ public class WidgetRenderingExample extends LayoutContainer {
         return b;
       }
     };
+
+    GridCellRenderer<Client> removeButtonRenderer = new GridCellRenderer<Client>() {
+
+      public Object render(final Client model, String property, ColumnData config, final int rowIndex,
+                           final int colIndex, final ListStore<Client> store, final Grid<Client> grid) {
+        final Button b = new Button("Удалить", new SelectionListener<ButtonEvent>() {
+          @Override
+          public void componentSelected(ButtonEvent ce) {
+//            final Client selectedItem = grid.getSelectionModel().getSelectedItem();
+            final Client selectedItem = store.getAt(rowIndex);
+            clientsServiceAsync.removeSession(selectedItem.getId(), new AsyncCallback<Void>() {
+              @Override
+              public void onFailure(Throwable throwable) {
+                System.out.println("fail deletion start");
+              }
+
+              @Override
+              public void onSuccess(Void aVoid) {
+                Info.display("Session ", selectedItem.getName() + " is deleted");
+              }
+            });
+//            Info.display("", selectedItem.getName());
+          }
+        });
+        toggleInprogressButtonStyle(model, b);
+        b.setWidth(grid.getColumnModel().getColumnWidth(colIndex) - 10);
+        b.setToolTip("Click for more information");
+
+        return b;
+      }
+    };
+
 
 
 
@@ -291,25 +369,25 @@ public class WidgetRenderingExample extends LayoutContainer {
     List<ColumnConfig> configs = new ArrayList<ColumnConfig>();
 
     ColumnConfig column = new ColumnConfig();
+    column.setId("owner");
+    column.setHeaderHtml("Кому принадлежит");
+    column.setRenderer(ownerCellRenderer);
+    column.setWidth(90);
+    configs.add(column);
+
+    column = new ColumnConfig();
     column.setId("name");
-    column.setHeaderHtml("Имя");
+    column.setHeaderHtml("Псевдоним");
     column.setRenderer(nameCellRenderer);
     column.setWidth(100);
     configs.add(column);
 
 //    column = new ColumnConfig();
-//    column.setId("name2");
-//    column.setRenderer(new ComboGridCellRenderer());
-//    column.setHeaderHtml("Имя combo");
-//    column.setWidth(50);
+//    column.setId("name");
+//    column.setHeaderHtml("Имя");
+//    column.setWidth(100);
+//    column.setRenderer(buttonRenderer);
 //    configs.add(column);
-
-    column = new ColumnConfig();
-    column.setId("name");
-    column.setHeaderHtml("Имя");
-    column.setWidth(100);
-    column.setRenderer(buttonRenderer);
-    configs.add(column);
 
 
     column = new ColumnConfig();
@@ -344,12 +422,36 @@ public class WidgetRenderingExample extends LayoutContainer {
     column.setRenderer(sumRenderer);
     configs.add(column);
 
+//    column = new ColumnConfig();
+//    column.setId("accept");
+//    column.setResizable(false);
+//    column.setHeaderHtml("В архив");
+//    column.setWidth(50);
+//    column.setRenderer(acceptButtonRenderer);
+//    configs.add(column);
+
     column = new ColumnConfig();
     column.setId("edit");
     column.setResizable(false);
     column.setHeaderHtml("Редактировать");
-    column.setWidth(80);
+    column.setWidth(100);
     column.setRenderer(editButtonRenderer);
+    configs.add(column);
+
+    column = new ColumnConfig();
+    column.setId("Accept");
+    column.setResizable(false);
+    column.setHeaderHtml("Принять");
+    column.setWidth(70);
+    column.setRenderer(acceptButtonRenderer);
+    configs.add(column);
+
+    column = new ColumnConfig();
+    column.setId("Remove");
+    column.setResizable(false);
+    column.setHeaderHtml("Удалить");
+    column.setWidth(70);
+    column.setRenderer(removeButtonRenderer);
     configs.add(column);
 
 //    column = new ColumnConfig();
@@ -449,6 +551,35 @@ public class WidgetRenderingExample extends LayoutContainer {
     cp.setButtonAlign(HorizontalAlignment.CENTER);
     cp.setLayout(new FitLayout());
     cp.setSize(1100, 300);
+
+
+
+    ToolBar toolBar = new ToolBar();
+    toolBar.getAriaSupport().setLabel("Grid Options");
+
+    toolBar.add(new LabelToolItem("Selection Mode: "));
+    final SimpleComboBox<String> type = new SimpleComboBox<String>();
+    type.setTriggerAction(ComboBox.TriggerAction.ALL);
+    type.setEditable(false);
+    type.setFireChangeEventOnSetValue(true);
+    type.setWidth(100);
+    type.add("Row");
+    type.add("Cell");
+    type.setSimpleValue("Row");
+//    type.addListener(Events.Change, new Listener<FieldEvent>() {
+//      public void handleEvent(FieldEvent be) {
+//        boolean cell = type.getSimpleValue().equals("Cell");
+//        grid.getSelectionModel().deselectAll();
+////        if (cell) {
+////          grid.setSelectionModel(new CellSelectionModel<Stock>());
+////        } else {
+////          grid.setSelectionModel(new GridSelectionModel<Stock>());
+////        }
+//      }
+//    });
+    toolBar.add(type);
+    cp.setTopComponent(toolBar);
+
 
     grid = new Grid<Client>(store, cm);
 //    grid.setWidth("100%");
