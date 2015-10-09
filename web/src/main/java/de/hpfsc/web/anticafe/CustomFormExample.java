@@ -1,5 +1,6 @@
 package de.hpfsc.web.anticafe;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;  
 import java.util.List;  
@@ -64,14 +65,25 @@ public class CustomFormExample extends LayoutContainer {
   FormPanel simple;
   private ClientsServiceAsync clientsServiceAsync = GWT.create(ClientsService.class);
 
-  public CustomFormExample(Client client) {
+  public CustomFormExample(Client client, List<Client> models) {
     this.currentClient = client;
     for (WhoseSessionEnum whoseSessionEnum: WhoseSessionEnum.values()) {
       simpleOwnerCombo.add(whoseSessionEnum.name());
     }
+
+
+    List<String> usedNames = new ArrayList<>();
+    if (models != null) {
+      for (Client usingClient: models) {
+        usedNames.add(usingClient.getName());
+      }
+    }
+
     simpleNameCombo.setTriggerAction(TriggerAction.ALL);
     for (ClientNamesEnum clientName: ClientNamesEnum.values()) {
-      simpleNameCombo.add(clientName.name());
+      if (!usedNames.contains(clientName.name())) {
+        simpleNameCombo.add(clientName.name());
+      }
     }
     simpleNameCombo.setSimpleValue(currentClient.getName());
     comment.setValue(currentClient.getComment());

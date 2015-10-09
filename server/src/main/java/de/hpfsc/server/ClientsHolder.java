@@ -47,7 +47,7 @@ public class ClientsHolder {
     clientMap.get(id).setAccepted(true);
   }
 
-  public ArrayList<Client> getClients() {
+  public ArrayList<Client> getClients(boolean isToShowAccepted) {
     ArrayList<Client> clientArrayList = new ArrayList<Client>();
     for (Client client: clientMap.values()) {
       clientArrayList.add(client);

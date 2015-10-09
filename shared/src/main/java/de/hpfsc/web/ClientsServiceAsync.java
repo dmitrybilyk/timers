@@ -12,7 +12,7 @@ public interface ClientsServiceAsync {
   void updateSession(long id, String name, String comment, AsyncCallback<Void> async);
   void updateSessionOwner(long id, WhoseSessionEnum whoseSession, AsyncCallback<Void> async);
 
-  void getClients(AsyncCallback<ArrayList<de.hpfsc.shared.Client>> async);
+  void getClients(boolean isToShowAccepted, AsyncCallback<ArrayList<Client>> async);
 
   void removeSession(long id, AsyncCallback<Void> async);
   void acceptSession(long id, AsyncCallback<Void> async);

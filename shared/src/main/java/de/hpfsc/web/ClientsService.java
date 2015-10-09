@@ -12,7 +12,7 @@ import java.util.ArrayList;
 @RemoteServiceRelativePath("clients")
 public interface ClientsService extends RemoteService {
   public Long addClient(WhoseSessionEnum whoseSessionEnum, long id, String name, String comment, long totalTime, long totalSum);
-  public ArrayList<de.hpfsc.shared.Client> getClients();
+  public ArrayList<de.hpfsc.shared.Client> getClients(boolean isToShowAccepted);
 
   void addSession(long id, String name, String comment, long totalTime, long totalSum);
 

@@ -25,19 +25,21 @@ import com.google.gwt.user.client.Element;
 import de.hpfsc.shared.Client;
 import de.hpfsc.shared.Session;
 
+import java.util.List;
+
 public class DialogExample extends Window {
 
 
   private Button saveButton;
   private Button cancelButton;
 
-  public DialogExample(Client client) {
+  public DialogExample(Client client, List<Client> models) {
     setModal(true);
     setHeadingHtml("Создание сессии");
     setSize(380, 440);
 //    setScrollMode(Scroll.AUTOY);
 
-    add(new CustomFormExample(client));
+    add(new CustomFormExample(client, models));
 //
 //    saveButton = new Button("Сохранить");
 //    cancelButton = new Button("Отмена");

@@ -22,8 +22,8 @@ public class ClientsServiceImpl extends RemoteServiceServlet implements ClientsS
 
 
 
-  public ArrayList<Client> getClients() {
-    ArrayList<Client> clients = holder.getClients();
+  public ArrayList<Client> getClients(boolean isToShowAccepted) {
+    ArrayList<Client> clients = holder.getClients(isToShowAccepted);
     Collections.sort(clients);
     return clients;
   }
@@ -80,6 +80,7 @@ public class ClientsServiceImpl extends RemoteServiceServlet implements ClientsS
       client.setName(updatedClient.getName());
       client.setComment(updatedClient.getComment());
       client.setTotalSum(updatedClient.getTotalSum());
+      client.setAccepted(updatedClient.isAccepted());
       client.setWhoseSession(updatedClient.getWhoseSession());
     }
   }

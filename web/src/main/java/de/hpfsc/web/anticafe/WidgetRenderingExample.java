@@ -8,9 +8,9 @@
 package de.hpfsc.web.anticafe;
 
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
+import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.Events;
-import com.extjs.gxt.ui.client.event.FieldEvent;
 import com.extjs.gxt.ui.client.event.GridEvent;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.SelectionListener;
@@ -20,9 +20,8 @@ import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.Info;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.button.Button;
-import com.extjs.gxt.ui.client.widget.form.ComboBox;
+import com.extjs.gxt.ui.client.widget.form.CheckBox;
 import com.extjs.gxt.ui.client.widget.form.LabelField;
-import com.extjs.gxt.ui.client.widget.form.SimpleComboBox;
 import com.extjs.gxt.ui.client.widget.grid.AggregationRenderer;
 import com.extjs.gxt.ui.client.widget.grid.AggregationRowConfig;
 import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
@@ -32,23 +31,19 @@ import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
 import com.extjs.gxt.ui.client.widget.grid.SummaryType;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
-import com.extjs.gxt.ui.client.widget.layout.FlowLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.LabelToolItem;
 import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import de.hpfsc.shared.Client;
-import de.hpfsc.shared.Session;
 import de.hpfsc.web.ClientsService;
 import de.hpfsc.web.ClientsServiceAsync;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class WidgetRenderingExample extends LayoutContainer {
@@ -56,6 +51,9 @@ public class WidgetRenderingExample extends LayoutContainer {
   private  Grid<Client> grid;
   final ListStore<Client> store = new ListStore<Client>();
   private ClientsServiceAsync clientsServiceAsync = GWT.create(ClientsService.class);
+  private boolean isToShowAccepted;
+  private CheckBox showAcceptedCheckBox;
+  private LabelField totalSumLabel = new LabelField();
 
   @Override
   protected void onRender(Element parent, int index) {
@@ -64,7 +62,7 @@ public class WidgetRenderingExample extends LayoutContainer {
     final Timer updateClientsTimer = new Timer() {
       @Override
       public void run() {
-        clientsServiceAsync.getClients(new AsyncCallback<ArrayList<Client>>() {
+        clientsServiceAsync.getClients(isToShowAccepted, new AsyncCallback<ArrayList<Client>>() {
           @Override
           public void onFailure(Throwable throwable) {
             System.out.println("fail get clients from timer");
@@ -73,34 +71,41 @@ public class WidgetRenderingExample extends LayoutContainer {
           @Override
           public void onSuccess(ArrayList<Client> clients) {
 
+            for (Client client : clients) {
 
-//            for (Client client: clients) {
-//              for (Client gridClient: store.getModels()) {
-//                if (client.getId() == gridClient.getId()) {
-//                  gridClient.setName(gridClient.getName());
-//                  client.setName(gridClient.getName()+"-");
-//                }
-//              }
-//            }
-//            store.removeAll();
-//            store.add(clients);
-            for (Client client: clients) {
               Client alreadyPresentModel = store.findModel(client);
+
               if (alreadyPresentModel == null) {
                 store.add(client);
               } else {
-                alreadyPresentModel.setName(client.getName());
-                alreadyPresentModel.setComment(client.getComment());
-                alreadyPresentModel.setTotalSum(client.getTotalSum());
-                alreadyPresentModel.setWhoseSession(client.getWhoseSession());
-                alreadyPresentModel.setAccepted(client.isAccepted());
-                alreadyPresentModel.setCreationalTime(client.getCreationalTime());
-                alreadyPresentModel.setInProgress(client.isInProgress());
-                alreadyPresentModel.setStartTime(client.getStartTime());
-                alreadyPresentModel.setStopTime(client.getStopTime());
-                alreadyPresentModel.setLimitTime(client.getLimitTime());
-                store.update(alreadyPresentModel);
+                updateClientInStore(client, alreadyPresentModel);
               }
+
+              long totalSumValue = 0l;
+              for (Client storeClient: store.getModels()) {
+                totalSumValue += storeClient.getTotalSum();
+              }
+              totalSumLabel.setValue(getPrettyMoney(totalSumValue));
+
+//              if (alreadyPresentModel == null) {
+//                if (showAcceptedCheckBox.getValue()) {
+//                  store.add(client);
+//                } else {
+//                  if (!client.isAccepted()) {
+//                    store.add(client);
+//                  }
+//                }
+//              } else {
+//                if (isToShowAccepted) {
+//                  updateClientInStore(client, alreadyPresentModel);
+//                } else {
+//                  if (client.isAccepted()) {
+//                    store.remove(client);
+//                  } else {
+//                    updateClientInStore(client, alreadyPresentModel);
+//                  }
+//                }
+//              }
             }
           }
 
@@ -168,7 +173,7 @@ public class WidgetRenderingExample extends LayoutContainer {
 
       public Object render(final Client model, String property, ColumnData config, final int rowIndex,
                            final int colIndex, final ListStore<Client> store, final Grid<Client> grid) {
-        final Button b = new Button("Play", new SelectionListener<ButtonEvent>() {
+        final Button b = new Button("Старт", new SelectionListener<ButtonEvent>() {
           @Override
           public void componentSelected(ButtonEvent ce) {
 //            final Client selectedItem = grid.getSelectionModel().getSelectedItem();
@@ -187,7 +192,7 @@ public class WidgetRenderingExample extends LayoutContainer {
             Info.display("", selectedItem.getName());
           }
         });
-        toggleInprogressButtonStyle(model, b);
+        b.setEnabled(!model.isInProgress());
         b.setWidth(grid.getColumnModel().getColumnWidth(colIndex) - 10);
         b.setToolTip("Click for more information");
 
@@ -216,6 +221,7 @@ public class WidgetRenderingExample extends LayoutContainer {
             });
           }
         });
+        b.setEnabled(model.isInProgress());
         b.setWidth(grid.getColumnModel().getColumnWidth(colIndex) - 10);
         b.setToolTip("Click for more information");
 
@@ -261,34 +267,35 @@ public class WidgetRenderingExample extends LayoutContainer {
     };
 
 
-    GridCellRenderer<Client> acceptButtonRenderer = new GridCellRenderer<Client>() {
+    GridCellRenderer<Client> acceptColumnRenderer = new GridCellRenderer<Client>() {
 
       public Object render(final Client model, String property, ColumnData config, final int rowIndex,
                            final int colIndex, final ListStore<Client> store, final Grid<Client> grid) {
-        final Button b = new Button("Принять", new SelectionListener<ButtonEvent>() {
+        final CheckBox acceptCheckbox = new CheckBox();
+        acceptCheckbox.setValue(model.isAccepted());
+        acceptCheckbox.addListener(Events.OnChange, new Listener<BaseEvent>() {
           @Override
-          public void componentSelected(ButtonEvent ce) {
-//            final Client selectedItem = grid.getSelectionModel().getSelectedItem();
-            final Client selectedItem = store.getAt(rowIndex);
-            clientsServiceAsync.acceptSession(selectedItem.getId(), new AsyncCallback<Void>() {
+          public void handleEvent(BaseEvent be) {
+            model.setAccepted(acceptCheckbox.getValue());
+            clientsServiceAsync.updateClient(model, new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable throwable) {
-                System.out.println("faile start");
+                System.out.println("client is not updated");
               }
 
               @Override
               public void onSuccess(Void aVoid) {
-                Info.display("Session ", selectedItem.getName() + " is accepted");
+                Info.display("Session ", model.getName() + " is accepted");
               }
             });
-            Info.display("", selectedItem.getName());
           }
         });
-        toggleInprogressButtonStyle(model, b);
-        b.setWidth(grid.getColumnModel().getColumnWidth(colIndex) - 10);
-        b.setToolTip("Click for more information");
 
-        return b;
+//        toggleInprogressButtonStyle(model, b);
+//        b.setWidth(grid.getColumnModel().getColumnWidth(colIndex) - 10);
+//        b.setToolTip("Click for more information");
+
+        return acceptCheckbox;
       }
     };
 
@@ -296,12 +303,12 @@ public class WidgetRenderingExample extends LayoutContainer {
     GridCellRenderer<Client> editButtonRenderer = new GridCellRenderer<Client>() {
 
       public Object render(final Client model, String property, ColumnData config, final int rowIndex,
-                           final int colIndex, ListStore<Client> store, Grid<Client> grid) {
+                           final int colIndex, final ListStore<Client> store, Grid<Client> grid) {
         final Client selectedItem = store.getAt(rowIndex);
         Button b = new Button("Редактировать", new SelectionListener<ButtonEvent>() {
           @Override
           public void componentSelected(ButtonEvent ce) {
-            DialogExample dialogExample = new DialogExample(model);
+            DialogExample dialogExample = new DialogExample(model, store.getModels());
             dialogExample.show();
           }
         });
@@ -439,11 +446,11 @@ public class WidgetRenderingExample extends LayoutContainer {
     configs.add(column);
 
     column = new ColumnConfig();
-    column.setId("Accept");
+    column.setId("accept");
     column.setResizable(false);
-    column.setHeaderHtml("Принять");
-    column.setWidth(70);
-    column.setRenderer(acceptButtonRenderer);
+    column.setHeaderHtml("В архиве");
+    column.setWidth(80);
+    column.setRenderer(acceptColumnRenderer);
     configs.add(column);
 
     column = new ColumnConfig();
@@ -488,7 +495,7 @@ public class WidgetRenderingExample extends LayoutContainer {
 //    column.setDateTimeFormat(DateTimeFormat.getShortDateFormat());
 //    configs.add(column);
 
-    clientsServiceAsync.getClients(new AsyncCallback<ArrayList<Client>>() {
+    clientsServiceAsync.getClients(isToShowAccepted, new AsyncCallback<ArrayList<Client>>() {
       @Override
       public void onFailure(Throwable throwable) {
         System.out.println("faile getting clients");
@@ -554,18 +561,24 @@ public class WidgetRenderingExample extends LayoutContainer {
 
 
 
-    ToolBar toolBar = new ToolBar();
-    toolBar.getAriaSupport().setLabel("Grid Options");
+    LayoutContainer totalSumContainer = new LayoutContainer();
+//    totalSumContainer.setSize(60, 30);
+//    totalSumLabel = new LabelField();
+    totalSumLabel.setFieldLabel("Итого: ");
+    totalSumContainer.add(totalSumLabel);
+//    ToolBar toolBar = new ToolBar();
+//    toolBar.getAriaSupport().setLabel("Grid Options");
+//
+//    toolBar.add(new LabelToolItem("Selection Mode: "));
+//    showAcceptedCheckBox = new CheckBox();
+//    showAcceptedCheckBox.setFieldLabel("Показывать принятые");
+//    showAcceptedCheckBox.addListener(Events.Select, new Listener<BaseEvent>() {
+//      @Override
+//      public void handleEvent(BaseEvent be) {
+//        isToShowAccepted = showAcceptedCheckBox.getValue();
+//      }
+//    });
 
-    toolBar.add(new LabelToolItem("Selection Mode: "));
-    final SimpleComboBox<String> type = new SimpleComboBox<String>();
-    type.setTriggerAction(ComboBox.TriggerAction.ALL);
-    type.setEditable(false);
-    type.setFireChangeEventOnSetValue(true);
-    type.setWidth(100);
-    type.add("Row");
-    type.add("Cell");
-    type.setSimpleValue("Row");
 //    type.addListener(Events.Change, new Listener<FieldEvent>() {
 //      public void handleEvent(FieldEvent be) {
 //        boolean cell = type.getSimpleValue().equals("Cell");
@@ -577,8 +590,8 @@ public class WidgetRenderingExample extends LayoutContainer {
 ////        }
 //      }
 //    });
-    toolBar.add(type);
-    cp.setTopComponent(toolBar);
+//    toolBar.add(showAcceptedCheckBox);
+    cp.setTopComponent(totalSumContainer);
 
 
     grid = new Grid<Client>(store, cm);
@@ -589,6 +602,20 @@ public class WidgetRenderingExample extends LayoutContainer {
     cp.add(grid);
 
     add(cp);
+  }
+
+  private void updateClientInStore(Client client, Client alreadyPresentModel) {
+    alreadyPresentModel.setName(client.getName());
+    alreadyPresentModel.setComment(client.getComment());
+    alreadyPresentModel.setTotalSum(client.getTotalSum());
+    alreadyPresentModel.setWhoseSession(client.getWhoseSession());
+    alreadyPresentModel.setAccepted(client.isAccepted());
+    alreadyPresentModel.setCreationalTime(client.getCreationalTime());
+    alreadyPresentModel.setInProgress(client.isInProgress());
+    alreadyPresentModel.setStartTime(client.getStartTime());
+    alreadyPresentModel.setStopTime(client.getStopTime());
+    alreadyPresentModel.setLimitTime(client.getLimitTime());
+    store.update(alreadyPresentModel);
   }
 
   private void renderSumeLabel(Client model, LabelField sumLabel) {
@@ -611,9 +638,11 @@ public class WidgetRenderingExample extends LayoutContainer {
 //      return;
 //    }
 
+    long totalSum = 0l;
     if (currentIntervalSeconds <= getSeconds(minTime)) {
 //          totalSumCurrentValue = minPayment;
 
+      totalSum = minPayment;
       sumLabel.setValue(getPrettyMoney(minPayment));
 //          totalSumCurrentValue = minPayment;
     } else {
@@ -621,12 +650,12 @@ public class WidgetRenderingExample extends LayoutContainer {
 
 //            BigDecimal totalSum = BigDecimal.valueOf(totalSumCurrentValue + 50);
 //            totalSumCurrentValue = totalSum.longValue();
-        long totalSum = minPayment + 50 * (currentIntervalSeconds - minTime / 1000) / 60;
+        totalSum = minPayment + 50 * (currentIntervalSeconds - minTime / 1000) / 60;
 //            totalSumCurrentValue = totalSum;
         sumLabel.setValue(getPrettyMoney(totalSum));
 //          }
     }
-    model.setTotalSum(minPayment);
+    model.setTotalSum(totalSum);
     clientsServiceAsync.updateClient(model, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -646,7 +675,7 @@ public class WidgetRenderingExample extends LayoutContainer {
     } else {
       b.getElement().getStyle().setBackgroundColor("black");
     }
-    b.repaint();
+//    store.update(model);
   }
 
   private String getPrettyMoney(long minPayment) {
