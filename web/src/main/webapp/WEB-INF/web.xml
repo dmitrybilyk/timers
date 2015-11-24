@@ -28,6 +28,16 @@
     <url-pattern>/parent/clients</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>namesService</servlet-name>
+    <servlet-class>de.hpfsc.server.NamesServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>namesService</servlet-name>
+    <url-pattern>/parent/names</url-pattern>
+  </servlet-mapping>
+
   <!-- Default page to serve -->
   <welcome-file-list>
     <welcome-file>parent.html</welcome-file>

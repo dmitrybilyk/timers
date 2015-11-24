@@ -31,4 +31,6 @@ public interface ClientsService extends RemoteService {
   void updateClient(Client updatedClient);
 
   void markSessionAsDeleted(long id);
+
+  void updateClientSum(Client updatedClient);
 }

@@ -12,6 +12,7 @@ import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.Events;
+import com.extjs.gxt.ui.client.event.FieldEvent;
 import com.extjs.gxt.ui.client.event.GridEvent;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.SelectionListener;
@@ -38,6 +39,8 @@ import com.extjs.gxt.ui.client.widget.grid.SummaryType;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.layout.FlowLayout;
 import com.extjs.gxt.ui.client.widget.layout.HBoxLayoutData;
+import com.extjs.gxt.ui.client.widget.toolbar.LabelToolItem;
+import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -71,7 +74,7 @@ public class WidgetRenderingExample extends LayoutContainer {
     final Timer updateClientsTimer = new Timer() {
       @Override
       public void run() {
-        clientsServiceAsync.getClients(isToShowAccepted, new AsyncCallback<ArrayList<Client>>() {
+        clientsServiceAsync.getClients(showAcceptedCheckBox.getValue(), new AsyncCallback<ArrayList<Client>>() {
           @Override
           public void onFailure(Throwable throwable) {
             System.out.println("fail get clients from timer");
@@ -476,13 +479,13 @@ public class WidgetRenderingExample extends LayoutContainer {
     column.setRenderer(acceptColumnRenderer);
     configs.add(column);
 
-    column = new ColumnConfig();
-    column.setId("Remove");
-    column.setResizable(false);
-    column.setHeaderHtml("Удалить");
-    column.setWidth(70);
-    column.setRenderer(removeButtonRenderer);
-    configs.add(column);
+//    column = new ColumnConfig();
+//    column.setId("Remove");
+//    column.setResizable(false);
+//    column.setHeaderHtml("Удалить");
+//    column.setWidth(70);
+//    column.setRenderer(removeButtonRenderer);
+//    configs.add(column);
 
     clientsServiceAsync.getClients(isToShowAccepted, new AsyncCallback<ArrayList<Client>>() {
       @Override
@@ -524,31 +527,21 @@ public class WidgetRenderingExample extends LayoutContainer {
     totalSumLabel.getElement().getStyle().setFontSize(20, Style.Unit.PX);
     totalSumLabel.getElement().getStyle().setColor("darkblue");
     totalSumContainer.add(totalSumLabel, layoutData);
-//    ToolBar toolBar = new ToolBar();
-//    toolBar.getAriaSupport().setLabel("Grid Options");
-//
-//    toolBar.add(new LabelToolItem("Selection Mode: "));
-//    showAcceptedCheckBox = new CheckBox();
-//    showAcceptedCheckBox.setFieldLabel("Показывать принятые");
-//    showAcceptedCheckBox.addListener(Events.Select, new Listener<BaseEvent>() {
-//      @Override
-//      public void handleEvent(BaseEvent be) {
-//        isToShowAccepted = showAcceptedCheckBox.getValue();
-//      }
-//    });
+    ToolBar toolBar = new ToolBar();
+    toolBar.getAriaSupport().setLabel("Grid Options");
 
-//    type.addListener(Events.Change, new Listener<FieldEvent>() {
-//      public void handleEvent(FieldEvent be) {
-//        boolean cell = type.getSimpleValue().equals("Cell");
-//        grid.getSelectionModel().deselectAll();
-////        if (cell) {
-////          grid.setSelectionModel(new CellSelectionModel<Stock>());
-////        } else {
-////          grid.setSelectionModel(new GridSelectionModel<Stock>());
-////        }
-//      }
-//    });
-//    toolBar.add(showAcceptedCheckBox);
+    toolBar.add(new LabelToolItem("Показывать архивные: "));
+    showAcceptedCheckBox = new CheckBox();
+    showAcceptedCheckBox.setFieldLabel("Показывать принятые");
+    showAcceptedCheckBox.addListener(Events.Select, new Listener<BaseEvent>() {
+      @Override
+      public void handleEvent(BaseEvent be) {
+        isToShowAccepted = showAcceptedCheckBox.getValue();
+      }
+    });
+
+    toolBar.add(showAcceptedCheckBox);
+    totalSumContainer.add(toolBar);
     cp.setTopComponent(totalSumContainer);
 
 
@@ -651,7 +644,7 @@ public class WidgetRenderingExample extends LayoutContainer {
 //          }
     }
     model.setTotalSum(totalSum);
-    clientsServiceAsync.updateClient(model, new AsyncCallback<Void>() {
+    clientsServiceAsync.updateClientSum(model, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable throwable) {
         System.out.println("fail update client");

@@ -1,6 +1,7 @@
 package de.hpfsc.web.anticafe;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;  
 import java.util.List;  
@@ -52,42 +53,77 @@ import de.hpfsc.shared.WhoseSessionEnum;
 import de.hpfsc.shared.model.Stock;
 import de.hpfsc.web.ClientsService;
 import de.hpfsc.web.ClientsServiceAsync;
+import de.hpfsc.web.NamesService;
+import de.hpfsc.web.NamesServiceAsync;
 import de.hpfsc.web.panels.BasicTabExample;
 
-public class CustomFormExample extends LayoutContainer {  
+public class AddEditSessionForm extends LayoutContainer {
     
-  private VerticalPanel vp;  
+  private VerticalPanel vp;
   private FormData formData;
   private Client currentClient;
   final SimpleComboBox<String> simpleNameCombo = new SimpleComboBox<>();
   final TextArea comment = new TextArea();
   final SimpleComboBox<String> simpleOwnerCombo = new SimpleComboBox<>();
   FormPanel simple;
+  String oldName;
+  String oldOwnerName;
   private ClientsServiceAsync clientsServiceAsync = GWT.create(ClientsService.class);
+  private NamesServiceAsync namesServiceAsync = GWT.create(NamesService.class);
 
-  public CustomFormExample(Client client, List<Client> models) {
+  public AddEditSessionForm(Client client, List<Client> models) {
+    oldName = client.getName();
+    oldOwnerName = client.getWhoseSession().name();
     this.currentClient = client;
-    for (WhoseSessionEnum whoseSessionEnum: WhoseSessionEnum.values()) {
-      simpleOwnerCombo.add(whoseSessionEnum.name());
-    }
-
-
-    List<String> usedNames = new ArrayList<>();
-    if (models != null) {
-      for (Client usingClient: models) {
-        usedNames.add(usingClient.getName());
+    namesServiceAsync.getFreeNames(new AsyncCallback<List<String>>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+        System.out.println("fail load free names");
       }
-    }
+
+      @Override
+      public void onSuccess(List<String> freeNames) {
+        for (String name: freeNames) {
+          simpleNameCombo.add(name);
+        }
+      }
+    });
+
+    namesServiceAsync.getFreeOwnersNames(new AsyncCallback<List<String>>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+        System.out.println("fail load free owners names");
+      }
+
+      @Override
+      public void onSuccess(List<String> freeNames) {
+        for (String name : freeNames) {
+          simpleOwnerCombo.add(name);
+        }
+        simpleOwnerCombo.setSimpleValue(currentClient.getWhoseSession().name());
+      }
+    });
+//    for (WhoseSessionEnum whoseSessionEnum: WhoseSessionEnum.values()) {
+//      simpleOwnerCombo.add(whoseSessionEnum.name());
+//    }
+
+
+//    List<String> usedNames = new ArrayList<>();
+//    if (models != null) {
+//      for (Client usingClient: models) {
+//        usedNames.add(usingClient.getName());
+//      }
+//    }
 
     simpleNameCombo.setTriggerAction(TriggerAction.ALL);
-    for (ClientNamesEnum clientName: ClientNamesEnum.values()) {
-      if (!usedNames.contains(clientName.name())) {
-        simpleNameCombo.add(clientName.name());
-      }
-    }
+//    for (ClientNamesEnum clientName: ClientNamesEnum.values()) {
+//      if (!usedNames.contains(clientName.name())) {
+//        simpleNameCombo.add(clientName.name());
+//      }
+//    }
     simpleNameCombo.setSimpleValue(currentClient.getName());
     comment.setValue(currentClient.getComment());
-    simpleOwnerCombo.setSimpleValue(currentClient.getWhoseSession().name());
+
   }
 
   @Override  
@@ -263,6 +299,30 @@ public class CustomFormExample extends LayoutContainer {
                       RootPanel.get().clear();
                       RootPanel.get().add(new BasicTabExample());
                       System.out.println(result);
+                      namesServiceAsync.saveUsedNames(Arrays.asList(simpleNameCombo.getValue().getValue()),
+                              oldName, new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable throwable) {
+                                  System.out.println("fail save used names");
+                                }
+
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                  System.out.println("used name is saved ");
+                                }
+                              });
+                      namesServiceAsync.saveUsedOwnersNames(Arrays.asList(simpleOwnerCombo.getValue().getValue()),
+                              oldOwnerName, new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable throwable) {
+                                  System.out.println("fail save used owners names");
+                                }
+
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                  System.out.println("used owner name is saved ");
+                                }
+                              });
                     }
                   });
         } else {
@@ -284,12 +344,42 @@ public class CustomFormExample extends LayoutContainer {
               Info.display("Updated", "client " + updatedClient.getName() + " is updated");
             }
           });
+          namesServiceAsync.saveUsedNames(Arrays.asList(simpleNameCombo.getValue().getValue()),
+                  oldName, new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                      System.out.println("fail save used names");
+                    }
+
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                      System.out.println("used name is saved ");
+                    }
+                  });
+          namesServiceAsync.saveUsedOwnersNames(Arrays.asList(simpleOwnerCombo.getValue().getValue()),
+                  oldOwnerName, new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                      System.out.println("fail save used owners names");
+                    }
+
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                      System.out.println("used owner name is saved ");
+                    }
+                  });
         }
 
       }
     });
     simple.addButton(saveButton);
-    simple.addButton(new Button("Отмена"));
+    Button cancelButton = new Button("Отмена", new SelectionListener<ButtonEvent>() {
+      @Override
+      public void componentSelected(ButtonEvent ce) {
+        AddEditSessionForm.this.hide();
+      }
+    });
+    simple.addButton(cancelButton);
   
     simple.setButtonAlign(HorizontalAlignment.CENTER);  
   

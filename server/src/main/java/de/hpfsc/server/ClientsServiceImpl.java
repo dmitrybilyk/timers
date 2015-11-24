@@ -86,12 +86,24 @@ public class ClientsServiceImpl extends RemoteServiceServlet implements ClientsS
     if (client != null) {
       client.setName(updatedClient.getName());
       client.setComment(updatedClient.getComment());
-      client.setTotalSum(updatedClient.getTotalSum());
+//      client.setTotalSum(updatedClient.getTotalSum());
 //      client.setAccepted(updatedClient.isAccepted());
       client.setWhoseSession(updatedClient.getWhoseSession());
     }
   }
 
+
+  @Override
+  public void updateClientSum(Client updatedClient) {
+    Client client = holder.getClientById(updatedClient.getId());
+    if (client != null) {
+//      client.setName(updatedClient.getName());
+//      client.setComment(updatedClient.getComment());
+      client.setTotalSum(updatedClient.getTotalSum());
+//      client.setAccepted(updatedClient.isAccepted());
+//      client.setWhoseSession(updatedClient.getWhoseSession());
+    }
+  }
 
 //  private void sendNotificationEmail(long id, String name, String comment, long totalTime, long totalSum) {
 //    final String username = "dmitry.bilyk@gmail.com";

@@ -53,7 +53,13 @@ public class ClientsHolder {
   public ArrayList<Client> getClients(boolean isToShowAccepted) {
     ArrayList<Client> clientArrayList = new ArrayList<Client>();
     for (Client client: clientMap.values()) {
-      clientArrayList.add(client);
+      if (isToShowAccepted) {
+        clientArrayList.add(client);
+      } else {
+        if (!client.isAccepted()) {
+          clientArrayList.add(client);
+        }
+      }
     }
     return clientArrayList;
   }

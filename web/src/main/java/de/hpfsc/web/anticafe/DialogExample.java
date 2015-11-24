@@ -7,23 +7,9 @@
  */
 package de.hpfsc.web.anticafe;
 
-import com.extjs.gxt.ui.client.Style.LayoutRegion;
-import com.extjs.gxt.ui.client.Style.Scroll;
-import com.extjs.gxt.ui.client.event.ButtonEvent;
-import com.extjs.gxt.ui.client.event.SelectionListener;
-import com.extjs.gxt.ui.client.util.Margins;
-import com.extjs.gxt.ui.client.widget.ContentPanel;
-import com.extjs.gxt.ui.client.widget.Dialog;
-import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.Window;
 import com.extjs.gxt.ui.client.widget.button.Button;
-import com.extjs.gxt.ui.client.widget.button.ButtonBar;
-import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
-import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
-import com.extjs.gxt.ui.client.widget.layout.FlowData;
-import com.google.gwt.user.client.Element;
 import de.hpfsc.shared.Client;
-import de.hpfsc.shared.Session;
 
 import java.util.List;
 
@@ -39,7 +25,7 @@ public class DialogExample extends Window {
     setSize(380, 440);
 //    setScrollMode(Scroll.AUTOY);
 
-    add(new CustomFormExample(client, models));
+    add(new AddEditSessionForm(client, models));
 //
 //    saveButton = new Button("Сохранить");
 //    cancelButton = new Button("Отмена");
