@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
+import de.hpfsc.shared.Client;
 import de.hpfsc.shared.WhoseSessionEnum;
 import de.hpfsc.web.ClientsService;
 import de.hpfsc.web.ClientsServiceAsync;
@@ -223,7 +224,9 @@ public class ClientSessionPanel extends Composite {
     closeTheSessionButton.setTitle("В архив");
     closeTheSessionButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        clientsServiceAsync.acceptSession(clientId, new AsyncCallback<Void>() {
+        Client acceptedClient = new Client();
+        acceptedClient.setId(clientId);
+        clientsServiceAsync.acceptSession(acceptedClient, new AsyncCallback<Void>() {
           public void onFailure(Throwable caught) {
             String s = "dfd";
           }

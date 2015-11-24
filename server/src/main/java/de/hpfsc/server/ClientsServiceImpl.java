@@ -39,7 +39,11 @@ public class ClientsServiceImpl extends RemoteServiceServlet implements ClientsS
   }
 
   public void removeSession(long id) {
-    holder.removeClient(id);
+    holder.removeSession(id);
+  }
+
+  public void markSessionAsDeleted(long id) {
+    holder.markSessionAsDeleted(id);
   }
 
 //  public void sendCompleteNotification(long id, String name, String comment, long totalTime, long totalSum) {
@@ -58,9 +62,12 @@ public class ClientsServiceImpl extends RemoteServiceServlet implements ClientsS
     client.setStopTime(System.currentTimeMillis());
   }
 
-  public void acceptSession(long id) {
-    holder.getClientById(id).setAccepted(true);
-//    stopSession(id);
+  public void acceptSession(Client acceptedClient) {
+    Client client = holder.getClientById(acceptedClient.getId());
+    if (client != null) {
+      client.setAccepted(acceptedClient.isAccepted());
+      stopSession(acceptedClient.getId(), acceptedClient.getTotalSum());
+    }
   }
 
   public void startSession(long id, long startTime) {
@@ -80,7 +87,7 @@ public class ClientsServiceImpl extends RemoteServiceServlet implements ClientsS
       client.setName(updatedClient.getName());
       client.setComment(updatedClient.getComment());
       client.setTotalSum(updatedClient.getTotalSum());
-      client.setAccepted(updatedClient.isAccepted());
+//      client.setAccepted(updatedClient.isAccepted());
       client.setWhoseSession(updatedClient.getWhoseSession());
     }
   }

@@ -30,6 +30,7 @@ public class Client extends BaseModel implements Serializable, Comparable {
   private boolean isInProgress;
   private long limitTime = 1000 * 60 * 60 * 5;
   private boolean accepted;
+  private boolean isDeleted;
 
 
   public enum Fields {
@@ -129,6 +130,14 @@ public class Client extends BaseModel implements Serializable, Comparable {
 
   public boolean isAccepted() {
     return accepted;
+  }
+
+  public boolean isDeleted() {
+    return isDeleted;
+  }
+
+  public void setIsDeleted(boolean isDeleted) {
+    this.isDeleted = isDeleted;
   }
 
   public long getCreationalTime() {

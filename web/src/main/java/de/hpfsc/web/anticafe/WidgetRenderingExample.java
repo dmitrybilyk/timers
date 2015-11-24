@@ -8,6 +8,7 @@
 package de.hpfsc.web.anticafe;
 
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
+import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.Events;
@@ -15,6 +16,7 @@ import com.extjs.gxt.ui.client.event.GridEvent;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.store.ListStore;
+import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.BoxComponent;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.Info;
@@ -22,23 +24,28 @@ import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.CheckBox;
 import com.extjs.gxt.ui.client.widget.form.LabelField;
+import com.extjs.gxt.ui.client.widget.form.SimpleComboBox;
 import com.extjs.gxt.ui.client.widget.grid.AggregationRenderer;
 import com.extjs.gxt.ui.client.widget.grid.AggregationRowConfig;
+import com.extjs.gxt.ui.client.widget.grid.CellEditor;
 import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
 import com.extjs.gxt.ui.client.widget.grid.ColumnData;
 import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
+import com.extjs.gxt.ui.client.widget.grid.RowEditor;
 import com.extjs.gxt.ui.client.widget.grid.SummaryType;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
-import com.extjs.gxt.ui.client.widget.toolbar.LabelToolItem;
-import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
+import com.extjs.gxt.ui.client.widget.layout.FlowLayout;
+import com.extjs.gxt.ui.client.widget.layout.HBoxLayoutData;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import de.hpfsc.shared.Client;
+import de.hpfsc.shared.ClientNamesEnum;
 import de.hpfsc.web.ClientsService;
 import de.hpfsc.web.ClientsServiceAsync;
 
@@ -49,11 +56,13 @@ import java.util.List;
 public class WidgetRenderingExample extends LayoutContainer {
 
   private  Grid<Client> grid;
+  private RowEditor<ModelData> rowEditor;
+  private  SimpleComboBox<String> nameEditor;
   final ListStore<Client> store = new ListStore<Client>();
   private ClientsServiceAsync clientsServiceAsync = GWT.create(ClientsService.class);
   private boolean isToShowAccepted;
   private CheckBox showAcceptedCheckBox;
-  private LabelField totalSumLabel = new LabelField();
+  private LabelField totalSumLabel = new LabelField("0.00");
 
   @Override
   protected void onRender(Element parent, int index) {
@@ -71,11 +80,14 @@ public class WidgetRenderingExample extends LayoutContainer {
           @Override
           public void onSuccess(ArrayList<Client> clients) {
 
+            if (clients.isEmpty()) {
+              store.removeAll();
+            }
             for (Client client : clients) {
 
               Client alreadyPresentModel = store.findModel(client);
 
-              if (alreadyPresentModel == null) {
+              if (alreadyPresentModel == null && !client.isDeleted()) {
                 store.add(client);
               } else {
                 updateClientInStore(client, alreadyPresentModel);
@@ -173,10 +185,12 @@ public class WidgetRenderingExample extends LayoutContainer {
 
       public Object render(final Client model, String property, ColumnData config, final int rowIndex,
                            final int colIndex, final ListStore<Client> store, final Grid<Client> grid) {
-        final Button b = new Button("Старт", new SelectionListener<ButtonEvent>() {
+        final Button b = new Button("Старт");
+        b.addSelectionListener(new SelectionListener<ButtonEvent>() {
           @Override
           public void componentSelected(ButtonEvent ce) {
 //            final Client selectedItem = grid.getSelectionModel().getSelectedItem();
+            b.setEnabled(false);
             final Client selectedItem = store.getAt(rowIndex);
             clientsServiceAsync.startSession(selectedItem.getId(), System.currentTimeMillis(), new AsyncCallback<Void>() {
               @Override
@@ -192,7 +206,7 @@ public class WidgetRenderingExample extends LayoutContainer {
             Info.display("", selectedItem.getName());
           }
         });
-        b.setEnabled(!model.isInProgress());
+        b.setEnabled(model.getStartTime() == 0);
         b.setWidth(grid.getColumnModel().getColumnWidth(colIndex) - 10);
         b.setToolTip("Click for more information");
 
@@ -259,8 +273,8 @@ public class WidgetRenderingExample extends LayoutContainer {
                            final int colIndex, ListStore<Client> store, Grid<Client> grid) {
         LabelField sumLabel = new LabelField("00.00");
 
-        if (model.getStartTime() != 0 && !model.isAccepted()) {
-          renderSumeLabel(model, sumLabel);
+        if (model.getStartTime() != 0) {
+          renderSumLabel(model, sumLabel);
         }
         return sumLabel;
       }
@@ -271,31 +285,35 @@ public class WidgetRenderingExample extends LayoutContainer {
 
       public Object render(final Client model, String property, ColumnData config, final int rowIndex,
                            final int colIndex, final ListStore<Client> store, final Grid<Client> grid) {
-        final CheckBox acceptCheckbox = new CheckBox();
-        acceptCheckbox.setValue(model.isAccepted());
-        acceptCheckbox.addListener(Events.OnChange, new Listener<BaseEvent>() {
+        Button b = new Button("В архив", new SelectionListener<ButtonEvent>() {
           @Override
-          public void handleEvent(BaseEvent be) {
-            model.setAccepted(acceptCheckbox.getValue());
-            clientsServiceAsync.updateClient(model, new AsyncCallback<Void>() {
+          public void componentSelected(ButtonEvent ce) {
+            model.setAccepted(true);
+            clientsServiceAsync.acceptSession(model, new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable throwable) {
-                System.out.println("client is not updated");
+                System.out.println("fail update from accept");
               }
 
               @Override
               public void onSuccess(Void aVoid) {
-                Info.display("Session ", model.getName() + " is accepted");
+                Info.display("", "Model is accepted");
               }
             });
           }
         });
+        if (model.isAccepted()) {
+          setClientAcceptedButton(b);
+        }
+        b.setWidth(grid.getColumnModel().getColumnWidth(colIndex) - 10);
+        b.setToolTip("Click to add to archive");
+        return b;
+      }
 
-//        toggleInprogressButtonStyle(model, b);
-//        b.setWidth(grid.getColumnModel().getColumnWidth(colIndex) - 10);
-//        b.setToolTip("Click for more information");
-
-        return acceptCheckbox;
+      private void setClientAcceptedButton(Button b) {
+        b.setHtml("В архиве");
+        b.getElement().getStyle().setBackgroundColor("green");
+        b.setEnabled(false);
       }
     };
 
@@ -328,7 +346,7 @@ public class WidgetRenderingExample extends LayoutContainer {
           public void componentSelected(ButtonEvent ce) {
 //            final Client selectedItem = grid.getSelectionModel().getSelectedItem();
             final Client selectedItem = store.getAt(rowIndex);
-            clientsServiceAsync.removeSession(selectedItem.getId(), new AsyncCallback<Void>() {
+            clientsServiceAsync.markSessionAsDeleted(selectedItem.getId(), new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable throwable) {
                 System.out.println("fail deletion start");
@@ -342,6 +360,9 @@ public class WidgetRenderingExample extends LayoutContainer {
 //            Info.display("", selectedItem.getName());
           }
         });
+        if (model.isDeleted()) {
+          b.setEnabled(false);
+        }
         toggleInprogressButtonStyle(model, b);
         b.setWidth(grid.getColumnModel().getColumnWidth(colIndex) - 10);
         b.setToolTip("Click for more information");
@@ -386,6 +407,8 @@ public class WidgetRenderingExample extends LayoutContainer {
     column.setId("name");
     column.setHeaderHtml("Псевдоним");
     column.setRenderer(nameCellRenderer);
+    nameEditor = new SimpleComboBox<>();
+    column.setEditor(new CellEditor(nameEditor));
     column.setWidth(100);
     configs.add(column);
 
@@ -448,7 +471,7 @@ public class WidgetRenderingExample extends LayoutContainer {
     column = new ColumnConfig();
     column.setId("accept");
     column.setResizable(false);
-    column.setHeaderHtml("В архиве");
+    column.setHeaderHtml("Архив");
     column.setWidth(80);
     column.setRenderer(acceptColumnRenderer);
     configs.add(column);
@@ -460,40 +483,6 @@ public class WidgetRenderingExample extends LayoutContainer {
     column.setWidth(70);
     column.setRenderer(removeButtonRenderer);
     configs.add(column);
-
-//    column = new ColumnConfig();
-//    column.setId("last");
-//    column.setHeaderHtml("Last");
-//    column.setAlignment(HorizontalAlignment.RIGHT);
-//    column.setWidth(75);
-////    column.setRenderer(gridNumber);
-//    configs.add(column);
-//
-//    column = new ColumnConfig();
-//    column.setId("last");
-//    column.setHeaderHtml("Last");
-//    column.setAlignment(HorizontalAlignment.RIGHT);
-//    column.setWidth(75);
-////    column.setRenderer(gridNumber);
-//    configs.add(column);
-//
-//    column = new ColumnConfig();
-//    column.setId("last");
-//    column.setHeaderHtml("Last");
-//    column.setAlignment(HorizontalAlignment.RIGHT);
-//    column.setWidth(75);
-////    column.setRenderer(gridNumber);
-//    configs.add(column);
-
-//    column = new ColumnConfig("change", "Change", 100);
-//    column.setAlignment(HorizontalAlignment.RIGHT);
-////    column.setRenderer(change);
-//    configs.add(column);
-
-//    column = new ColumnConfig("date", "Last Updated", 100);
-//    column.setAlignment(HorizontalAlignment.RIGHT);
-//    column.setDateTimeFormat(DateTimeFormat.getShortDateFormat());
-//    configs.add(column);
 
     clientsServiceAsync.getClients(isToShowAccepted, new AsyncCallback<ArrayList<Client>>() {
       @Override
@@ -512,44 +501,6 @@ public class WidgetRenderingExample extends LayoutContainer {
 
     ColumnModel cm = new ColumnModel(configs);
 
-    AggregationRowConfig<Client> averages = new AggregationRowConfig<Client>();
-    averages.setHtml("totalSum", "Sum");
-
-    // with summary type and format
-    averages.setSummaryType("sum", SummaryType.SUM);
-    averages.setSummaryFormat("sum", NumberFormat.getCurrencyFormat());
-
-    // with renderer
-    averages.setSummaryType("sum", SummaryType.SUM);
-    averages.setRenderer("sum", new AggregationRenderer<Client>() {
-      public Object render(Number value, int colIndex, Grid<Client> grid, ListStore<Client> store) {
-        // you can return html here
-        if (value != null) {
-          return number.format(value.doubleValue());
-        }
-        return "";
-      }
-    });
-    cm.addAggregationRow(averages);
-
-    averages = new AggregationRowConfig<Client>();
-    averages.setHtml("name", "Maximum");
-
-
-    averages.setSummaryType("sum", SummaryType.SUM);
-    averages.setSummaryFormat("sum", NumberFormat.getCurrencyFormat());
-
-    averages.setSummaryType("sum", SummaryType.SUM);
-    averages.setRenderer("sum", new AggregationRenderer<Client>() {
-      public Object render(Number value, int colIndex, Grid<Client> grid, ListStore<Client> store) {
-        if(value != null) {
-          return number.format(value.doubleValue());
-        }
-        return "";
-      }
-    });
-    cm.addAggregationRow(averages);
-
     ContentPanel cp = new ContentPanel();
     cp.setBodyBorder(false);
 //    cp.setIcon(Resources.ICONS.table());
@@ -562,10 +513,17 @@ public class WidgetRenderingExample extends LayoutContainer {
 
 
     LayoutContainer totalSumContainer = new LayoutContainer();
+    totalSumContainer.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+    HBoxLayoutData layoutData = new HBoxLayoutData();
+    layoutData.setMargins(new Margins(2));
+    totalSumContainer.setLayoutData(layoutData);
 //    totalSumContainer.setSize(60, 30);
 //    totalSumLabel = new LabelField();
-    totalSumLabel.setFieldLabel("Итого: ");
-    totalSumContainer.add(totalSumLabel);
+    LabelField sumLabel = new LabelField("Итого: ");
+//    totalSumContainer.add(sumLabel, layoutData);
+    totalSumLabel.getElement().getStyle().setFontSize(20, Style.Unit.PX);
+    totalSumLabel.getElement().getStyle().setColor("darkblue");
+    totalSumContainer.add(totalSumLabel, layoutData);
 //    ToolBar toolBar = new ToolBar();
 //    toolBar.getAriaSupport().setLabel("Grid Options");
 //
@@ -598,27 +556,64 @@ public class WidgetRenderingExample extends LayoutContainer {
 //    grid.setWidth("100%");
     grid.setStyleAttribute("borderTop", "none");
     grid.setAutoExpandColumn("name");
+    rowEditor = new RowEditor<>();
+    rowEditor.addListener(Events.BeforeEdit, new Listener<BaseEvent>() {
+      @Override
+      public void handleEvent(BaseEvent be) {
+        nameEditor.removeAll();
+        for (ClientNamesEnum clientName: ClientNamesEnum.values()) {
+          if (!isStoreContainsName(clientName.name())) {
+            nameEditor.add(clientName.name());
+          }
+        }
+      }
+    });
+    grid.addPlugin(rowEditor);
     grid.setBorders(true);
     cp.add(grid);
 
     add(cp);
   }
 
-  private void updateClientInStore(Client client, Client alreadyPresentModel) {
-    alreadyPresentModel.setName(client.getName());
-    alreadyPresentModel.setComment(client.getComment());
-    alreadyPresentModel.setTotalSum(client.getTotalSum());
-    alreadyPresentModel.setWhoseSession(client.getWhoseSession());
-    alreadyPresentModel.setAccepted(client.isAccepted());
-    alreadyPresentModel.setCreationalTime(client.getCreationalTime());
-    alreadyPresentModel.setInProgress(client.isInProgress());
-    alreadyPresentModel.setStartTime(client.getStartTime());
-    alreadyPresentModel.setStopTime(client.getStopTime());
-    alreadyPresentModel.setLimitTime(client.getLimitTime());
-    store.update(alreadyPresentModel);
+  private boolean isStoreContainsName(String name) {
+    for (Client client: store.getModels()) {
+      if (client.getName().equals(name)) {
+        return true;
+      }
+    }
+    return false;
   }
 
-  private void renderSumeLabel(Client model, LabelField sumLabel) {
+  private void updateClientInStore(Client client, Client alreadyPresentModel) {
+    if (client.isDeleted()) {
+      clientsServiceAsync.removeSession(client.getId(), new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable throwable) {
+          System.out.println("faile remove");
+        }
+
+        @Override
+        public void onSuccess(Void aVoid) {
+          System.out.println("session is removed");
+        }
+      });
+      store.remove(client);
+    } else {
+      alreadyPresentModel.setName(client.getName());
+      alreadyPresentModel.setComment(client.getComment());
+      alreadyPresentModel.setTotalSum(client.getTotalSum());
+      alreadyPresentModel.setWhoseSession(client.getWhoseSession());
+      alreadyPresentModel.setAccepted(client.isAccepted());
+      alreadyPresentModel.setCreationalTime(client.getCreationalTime());
+      alreadyPresentModel.setInProgress(client.isInProgress());
+      alreadyPresentModel.setStartTime(client.getStartTime());
+      alreadyPresentModel.setStopTime(client.getStopTime());
+      alreadyPresentModel.setLimitTime(client.getLimitTime());
+      store.update(alreadyPresentModel);
+    }
+  }
+
+  private void renderSumLabel(Client model, LabelField sumLabel) {
     Long minTime = 60000l; // minimum period 1 minutes
     Long minPayment = 3500l;
     Long stopTime = model.getStopTime();

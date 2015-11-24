@@ -39,8 +39,11 @@ public class ClientsHolder {
     return clientMap.get(id);
   }
 
-  public void removeClient(long id) {
-    clientMap.remove(id);
+  public void markSessionAsDeleted(long id) {
+    Client clientToBeDeleted = clientMap.get(id);
+    if (clientToBeDeleted != null) {
+      clientToBeDeleted.setIsDeleted(true);
+    }
   }
 
   public void acceptClientSession(long id) {
@@ -65,4 +68,7 @@ public class ClientsHolder {
     return id + 1;
   }
 
+  public void removeSession(long id) {
+    clientMap.remove(id);
+  }
 }
