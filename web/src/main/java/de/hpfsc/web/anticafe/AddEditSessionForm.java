@@ -68,10 +68,14 @@ public class AddEditSessionForm extends LayoutContainer {
   FormPanel simple;
   String oldName;
   String oldOwnerName;
+  private DialogExample dialogExample;
+  private ListStore<Client> store;
   private ClientsServiceAsync clientsServiceAsync = GWT.create(ClientsService.class);
   private NamesServiceAsync namesServiceAsync = GWT.create(NamesService.class);
 
-  public AddEditSessionForm(Client client, List<Client> models) {
+  public AddEditSessionForm(DialogExample dialogExample, Client client, ListStore<Client> store) {
+    this.dialogExample = dialogExample;
+    this.store = store;
     oldName = client.getName();
     oldOwnerName = client.getWhoseSession().name();
     this.currentClient = client;
@@ -83,8 +87,15 @@ public class AddEditSessionForm extends LayoutContainer {
 
       @Override
       public void onSuccess(List<String> freeNames) {
-        for (String name: freeNames) {
+        for (String name : freeNames) {
           simpleNameCombo.add(name);
+        }
+        String currentClientName = currentClient.getName();
+        if (currentClientName != null) {
+          if (!isCurrentNameAlreadyPresentInCombo(currentClientName)){
+            simpleNameCombo.add(currentClientName);
+          }
+          simpleNameCombo.setSimpleValue(currentClientName);
         }
       }
     });
@@ -103,27 +114,18 @@ public class AddEditSessionForm extends LayoutContainer {
         simpleOwnerCombo.setSimpleValue(currentClient.getWhoseSession().name());
       }
     });
-//    for (WhoseSessionEnum whoseSessionEnum: WhoseSessionEnum.values()) {
-//      simpleOwnerCombo.add(whoseSessionEnum.name());
-//    }
-
-
-//    List<String> usedNames = new ArrayList<>();
-//    if (models != null) {
-//      for (Client usingClient: models) {
-//        usedNames.add(usingClient.getName());
-//      }
-//    }
-
     simpleNameCombo.setTriggerAction(TriggerAction.ALL);
-//    for (ClientNamesEnum clientName: ClientNamesEnum.values()) {
-//      if (!usedNames.contains(clientName.name())) {
-//        simpleNameCombo.add(clientName.name());
-//      }
-//    }
-    simpleNameCombo.setSimpleValue(currentClient.getName());
     comment.setValue(currentClient.getComment());
 
+  }
+
+  private boolean isCurrentNameAlreadyPresentInCombo(String currentClientName) {
+    for(SimpleComboValue simpleComboValue: simpleNameCombo.getStore().getModels()) {
+      if (simpleComboValue.getValue().equals(currentClientName)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override  
@@ -156,20 +158,12 @@ public class AddEditSessionForm extends LayoutContainer {
       }  
     };
 
-
-
     simpleOwnerCombo.setFieldLabel("Кому принадлежит");
-//    for (WhoseSessionEnum whoseSessionEnum: WhoseSessionEnum.values()) {
-//      simpleOwnerCombo.add(whoseSessionEnum.name());
-//    }
     simpleOwnerCombo.setSimpleValue(WhoseSessionEnum.ADMIN.name());
     simple.add(simpleOwnerCombo);
 
 
     simpleNameCombo.setFieldLabel("Псевдоним");
-//    for (ClientNamesEnum clientName: ClientNamesEnum.values()) {
-//      simpleNameCombo.add(clientName.name());
-//    }
     simple.add(simpleNameCombo);
 
 
@@ -177,111 +171,6 @@ public class AddEditSessionForm extends LayoutContainer {
     comment.setEmptyText("Введите комментарий");
     simple.add(comment, formData);
   
-//    TextField<String> email = new TextField<String>();
-//    email.setFieldLabel("Email");
-//    email.setAllowBlank(false);
-//    email.addPlugin(plugin);
-//    email.setData("text", "Enter you email (required)");
-//    simple.add(email, formData);
-//
-//    List<Session> stocks = TestData.getSessions();
-//    Collections.sort(stocks, new Comparator<Session>() {
-//      public int compare(Session arg0, Session arg1) {
-//        return arg0.getName().compareTo(arg1.getName());
-//      }
-//    });
-//
-//    ListStore<Session> store = new ListStore<Session>();
-//    store.add(stocks);
-//
-//    ComboBox<Session> combo = new ComboBox<Session>();
-//    combo.setFieldLabel("Company");
-//    combo.setDisplayField("name");
-//    combo.setTriggerAction(TriggerAction.ALL);
-//    combo.setStore(store);
-//    combo.addPlugin(plugin);
-//    combo.setData("text", "Choose the company");
-//    simple.add(combo, formData);
-//
-//    DateField date = new DateField();
-//    date.setFieldLabel("Birthday");
-//    date.addPlugin(plugin);
-//    date.setData("text", "Enter your birthday");
-//    simple.add(date, formData);
-//
-//    TimeField time = new TimeField();
-//    time.setFieldLabel("Time");
-//    time.addPlugin(plugin);
-//    time.setData("text", "Enter the time");
-//    simple.add(time, formData);
-//
-//    Slider slider = new Slider();
-//    slider.setMinValue(40);
-//    slider.setMaxValue(90);
-//    slider.setValue(60);
-//    slider.setIncrement(1);
-//    slider.setMessage("{0} inches tall");
-//    slider.addPlugin(plugin);
-//    slider.setData("text", "Select your height");
-//
-//    final SliderField sf = new SliderField(slider);
-//    sf.setFieldLabel("Size");
-//    simple.add(sf, formData);
-//
-//    CheckBox check1 = new CheckBox();
-//    check1.setBoxLabel("Classical");
-//
-//    CheckBox check2 = new CheckBox();
-//    check2.setBoxLabel("Rock");
-//    check2.setValue(true);
-//
-//    CheckBox check3 = new CheckBox();
-//    check3.setBoxLabel("Blues");
-//
-//    CheckBoxGroup checkGroup = new CheckBoxGroup();
-//    checkGroup.setFieldLabel("Music");
-//    checkGroup.add(check1);
-//    checkGroup.add(check2);
-//    checkGroup.add(check3);
-//    checkGroup.addPlugin(plugin);
-//    checkGroup.setData("text", "Select your favorite music type");
-//    simple.add(checkGroup, formData);
-//
-//    Radio radio = new Radio();
-//    radio.setBoxLabel("Red");
-//    radio.setValue(true);
-//
-//    Radio radio2 = new Radio();
-//    radio2.setBoxLabel("Blue");
-//
-//    RadioGroup radioGroup = new RadioGroup();
-//    radioGroup.setFieldLabel("Favorite Color");
-//    radioGroup.add(radio);
-//    radioGroup.add(radio2);
-//    radioGroup.addPlugin(plugin);
-//    radioGroup.setData("text", "Select your favorite color");
-//    simple.add(radioGroup, formData);
-//
-//    Radio radio3 = new Radio();
-//    radio3.setBoxLabel("Apple");
-//    radio3.setValue(true);
-//
-//    Radio radio4 = new Radio();
-//    radio4.setBoxLabel("Banana");
-//
-//    RadioGroup radioGroup2 = new RadioGroup();
-//    radioGroup2.setFieldLabel("Favorite Fruit");
-//    radioGroup2.add(radio3);
-//    radioGroup2.add(radio4);
-//    radioGroup2.addPlugin(plugin);
-//    radioGroup2.setData("text", "Select you favorite fruit");
-//    simple.add(radioGroup2, formData);
-//
-//    TextArea description = new TextArea();
-//    description.setPreventScrollbars(true);
-//    description.setFieldLabel("Description");
-//    simple.add(description, formData);
-//
     Button saveButton = new Button("Сохранить");
     saveButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
       @Override
@@ -296,8 +185,9 @@ public class AddEditSessionForm extends LayoutContainer {
 
                     @Override
                     public void onSuccess(Long result) {
-                      RootPanel.get().clear();
-                      RootPanel.get().add(new BasicTabExample());
+//                      RootPanel.get().clear();
+//                      RootPanel.get().add(new BasicTabExample());
+
                       System.out.println(result);
                       namesServiceAsync.saveUsedNames(Arrays.asList(simpleNameCombo.getValue().getValue()),
                               oldName, new AsyncCallback<Void>() {
@@ -321,6 +211,7 @@ public class AddEditSessionForm extends LayoutContainer {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                   System.out.println("used owner name is saved ");
+                                  dialogExample.hide();
                                 }
                               });
                     }
@@ -339,8 +230,9 @@ public class AddEditSessionForm extends LayoutContainer {
 
             @Override
             public void onSuccess(Void result) {
-              RootPanel.get().clear();
-              RootPanel.get().add(new BasicTabExample());
+//              RootPanel.get().clear();
+//              RootPanel.get().add(new BasicTabExample());
+              store.update(currentClient);
               Info.display("Updated", "client " + updatedClient.getName() + " is updated");
             }
           });
@@ -366,6 +258,7 @@ public class AddEditSessionForm extends LayoutContainer {
                     @Override
                     public void onSuccess(Void aVoid) {
                       System.out.println("used owner name is saved ");
+                      dialogExample.hide();
                     }
                   });
         }
@@ -376,11 +269,11 @@ public class AddEditSessionForm extends LayoutContainer {
     Button cancelButton = new Button("Отмена", new SelectionListener<ButtonEvent>() {
       @Override
       public void componentSelected(ButtonEvent ce) {
-        AddEditSessionForm.this.hide();
+        dialogExample.hide();
       }
     });
     simple.addButton(cancelButton);
-  
+
     simple.setButtonAlign(HorizontalAlignment.CENTER);  
   
     FormButtonBinding binding = new FormButtonBinding(simple);  

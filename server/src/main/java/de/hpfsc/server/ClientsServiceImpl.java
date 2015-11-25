@@ -76,6 +76,7 @@ public class ClientsServiceImpl extends RemoteServiceServlet implements ClientsS
       client.setStartTime(startTime);
       client.setStopTime(0);
       client.setInProgress(true);
+      client.setAccepted(false);
     }
     ;
   }

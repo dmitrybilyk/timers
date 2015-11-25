@@ -86,6 +86,13 @@ public class WidgetRenderingExample extends LayoutContainer {
             if (clients.isEmpty()) {
               store.removeAll();
             }
+
+            for (Client client: store.getModels()) {
+              if (!clients.contains(client)) {
+                store.remove(client);
+              }
+            }
+
             for (Client client : clients) {
 
               Client alreadyPresentModel = store.findModel(client);
@@ -255,7 +262,7 @@ public class WidgetRenderingExample extends LayoutContainer {
 
         Long endTime = null;
 
-        if (!model.isInProgress() && stopTime != 0) {
+        if (!model.isInProgress() && stopTime != 0 && model.getStartTime() != 0) {
           endTime = stopTime;
           timeLabel.setValue(getMinutesString(endTime - model.getStartTime()));
         } else if (model.isInProgress()) {
@@ -305,18 +312,19 @@ public class WidgetRenderingExample extends LayoutContainer {
             });
           }
         });
-        if (model.isAccepted()) {
-          setClientAcceptedButton(b);
-        }
+        setClientAcceptedButton(b, model.isAccepted(), model.isInProgress());
+
         b.setWidth(grid.getColumnModel().getColumnWidth(colIndex) - 10);
         b.setToolTip("Click to add to archive");
         return b;
       }
 
-      private void setClientAcceptedButton(Button b) {
-        b.setHtml("В архиве");
-        b.getElement().getStyle().setBackgroundColor("green");
-        b.setEnabled(false);
+      private void setClientAcceptedButton(Button b, boolean accepted, boolean inProgress) {
+        if (accepted && !inProgress) {
+          b.setHtml("В архиве");
+          b.getElement().getStyle().setBackgroundColor("green");
+          b.setEnabled(false);
+        }
       }
     };
 
@@ -329,7 +337,7 @@ public class WidgetRenderingExample extends LayoutContainer {
         Button b = new Button("Редактировать", new SelectionListener<ButtonEvent>() {
           @Override
           public void componentSelected(ButtonEvent ce) {
-            DialogExample dialogExample = new DialogExample(model, store.getModels());
+            DialogExample dialogExample = new DialogExample(model, store);
             dialogExample.show();
           }
         });
