@@ -15,9 +15,14 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.user.client.Element;  
 import com.google.gwt.user.client.Window;  
   
-public class BasicTabExample extends LayoutContainer {  
-  
-  @Override  
+public class BasicTabExample extends LayoutContainer {
+
+  String whoseSession;
+  public BasicTabExample(String userName) {
+    this.whoseSession = userName;
+  }
+
+  @Override
   protected void onRender(Element parent, int pos) {  
     super.onRender(parent, pos);
     setWidth(1100);
@@ -33,7 +38,7 @@ public class BasicTabExample extends LayoutContainer {
 //    folder.setAutoHeight(true);
   
     TabItem timerTabItem = new TabItem("Счетчики");
-    timerTabItem.add(new BorderLayoutExample());
+    timerTabItem.add(new BorderLayoutExample(whoseSession));
 //    timerTabItem.addStyleName("pad-text");
 //    timerTabItem.addText(txt);
     folder.add(timerTabItem);

@@ -23,7 +23,11 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
 import de.hpfsc.web.GreetingService;
 import de.hpfsc.web.GreetingServiceAsync;
+import de.hpfsc.web.panels.BasicTabExample;
 import de.hpfsc.web.panels.BorderLayoutExample;
+
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -126,7 +130,7 @@ public class LoginDialog extends Dialog {
     add(userNameTextField);
 
     passwordTextField.setPassword(true);
-    passwordTextField.setAllowBlank(false);
+    passwordTextField.setAllowBlank(true);
     passwordTextField.setFieldLabel("Password");
     passwordTextField.addKeyListener(new KeyListener() {
       @Override
@@ -144,9 +148,18 @@ public class LoginDialog extends Dialog {
     loginButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
       @Override
       public void componentSelected(ButtonEvent ce) {
-        BorderLayoutExample borderLayoutExample = new BorderLayoutExample();
-        borderLayoutExample.show();
-        RootPanel.get().add(borderLayoutExample);
+        List<String> usersList = Arrays.asList("admin", "first", "second");
+        String userName = userNameTextField.getValue();
+        if (userName != null && usersList.contains(userName)) {
+          BasicTabExample basicTabExample = new BasicTabExample(userName);
+          basicTabExample.show();
+          LoginDialog.this.getParent().removeFromParent();
+//          LoginDialog.this.hide();
+          RootPanel.get().add(basicTabExample);
+        } else {
+          userNameTextField.setValue(null);
+        }
+
       }
     });
 

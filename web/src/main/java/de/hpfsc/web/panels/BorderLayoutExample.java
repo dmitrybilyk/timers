@@ -9,14 +9,27 @@ import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.LabelField;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
+import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.ui.RootPanel;
 import de.hpfsc.shared.Client;
+import de.hpfsc.shared.WhoseSessionEnum;
 import de.hpfsc.web.anticafe.DialogExample;
 import de.hpfsc.web.anticafe.WidgetRenderingExample;
+import de.hpfsc.web.dialogs.LoginDialog;
 
-public class BorderLayoutExample extends LayoutContainer {  
-  
-  protected void onRender(Element target, int index) {  
+public class BorderLayoutExample extends LayoutContainer {
+
+  String userName;
+  public BorderLayoutExample(String userName) {
+    this.userName = userName;
+  }
+
+  public BorderLayoutExample() {
+
+  }
+
+  protected void onRender(Element target, int index) {
     super.onRender(target, index);  
     final BorderLayout layout = new BorderLayout();
     setHeight(1200);
@@ -34,7 +47,7 @@ public class BorderLayoutExample extends LayoutContainer {
     createSessionButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
       @Override
       public void componentSelected(ButtonEvent ce) {
-        DialogExample dialogExample = new DialogExample(new Client(), null);
+        DialogExample dialogExample = new DialogExample(WhoseSessionEnum.valueOf(userName.toUpperCase()), new Client(), null);
 //        dialogExample.setWidth(300);
 //        dialogExample.setHeight(200);
         dialogExample.show();
@@ -43,7 +56,7 @@ public class BorderLayoutExample extends LayoutContainer {
       }
     });
 //    north.add(new SessionsGrid(), new BorderLayoutData(LayoutRegion.CENTER, 350));
-    north.add(new WidgetRenderingExample(), new BorderLayoutData(LayoutRegion.CENTER, 350));
+    north.add(new WidgetRenderingExample(userName), new BorderLayoutData(LayoutRegion.CENTER, 350));
 
     north.add(createSessionButton, new BorderLayoutData(LayoutRegion.SOUTH, 100));
     ContentPanel west = new ContentPanel();
@@ -51,7 +64,21 @@ public class BorderLayoutExample extends LayoutContainer {
     west.setHeaderVisible(true);
     west.setHeadingHtml("Инфо");
     west.add(new LabelField("Имя пользователя здесь"));
-    west.add(new Button("Выход"));
+    Button logoutButton = new Button("Выход");
+    logoutButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
+      @Override
+      public void componentSelected(ButtonEvent ce) {
+        RootPanel.get().clear();
+        ContentPanel centerPanel = new ContentPanel();
+        centerPanel.setHeaderVisible(false);
+        centerPanel.setLayout(new CenterLayout());
+        centerPanel.add(new LoginDialog());
+        centerPanel.setHeight(500);
+        centerPanel.setWidth("100%");
+        RootPanel.get().add(centerPanel);
+      }
+    });
+    west.add(logoutButton);
 
     ContentPanel center = new ContentPanel();
     center.setHeaderVisible(true);

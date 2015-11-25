@@ -22,8 +22,8 @@ public class ClientsServiceImpl extends RemoteServiceServlet implements ClientsS
 
 
 
-  public ArrayList<Client> getClients(boolean isToShowAccepted) {
-    ArrayList<Client> clients = holder.getClients(isToShowAccepted);
+  public ArrayList<Client> getClients(WhoseSessionEnum whoseSession, boolean isToShowAccepted) {
+    ArrayList<Client> clients = holder.getClients(whoseSession, isToShowAccepted);
     Collections.sort(clients);
     return clients;
   }

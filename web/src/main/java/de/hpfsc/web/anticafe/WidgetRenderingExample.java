@@ -12,7 +12,6 @@ import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.Events;
-import com.extjs.gxt.ui.client.event.FieldEvent;
 import com.extjs.gxt.ui.client.event.GridEvent;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.SelectionListener;
@@ -26,8 +25,6 @@ import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.CheckBox;
 import com.extjs.gxt.ui.client.widget.form.LabelField;
 import com.extjs.gxt.ui.client.widget.form.SimpleComboBox;
-import com.extjs.gxt.ui.client.widget.grid.AggregationRenderer;
-import com.extjs.gxt.ui.client.widget.grid.AggregationRowConfig;
 import com.extjs.gxt.ui.client.widget.grid.CellEditor;
 import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
 import com.extjs.gxt.ui.client.widget.grid.ColumnData;
@@ -35,9 +32,7 @@ import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
 import com.extjs.gxt.ui.client.widget.grid.RowEditor;
-import com.extjs.gxt.ui.client.widget.grid.SummaryType;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
-import com.extjs.gxt.ui.client.widget.layout.FlowLayout;
 import com.extjs.gxt.ui.client.widget.layout.HBoxLayoutData;
 import com.extjs.gxt.ui.client.widget.toolbar.LabelToolItem;
 import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
@@ -49,6 +44,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import de.hpfsc.shared.Client;
 import de.hpfsc.shared.ClientNamesEnum;
+import de.hpfsc.shared.WhoseSessionEnum;
 import de.hpfsc.web.ClientsService;
 import de.hpfsc.web.ClientsServiceAsync;
 
@@ -66,6 +62,12 @@ public class WidgetRenderingExample extends LayoutContainer {
   private boolean isToShowAccepted;
   private CheckBox showAcceptedCheckBox;
   private LabelField totalSumLabel = new LabelField("0.00");
+  private WhoseSessionEnum whoseSession;
+
+  public WidgetRenderingExample(String userName) {
+    whoseSession = WhoseSessionEnum.valueOf(userName.toUpperCase());
+  }
+
 
   @Override
   protected void onRender(Element parent, int index) {
@@ -74,7 +76,7 @@ public class WidgetRenderingExample extends LayoutContainer {
     final Timer updateClientsTimer = new Timer() {
       @Override
       public void run() {
-        clientsServiceAsync.getClients(showAcceptedCheckBox.getValue(), new AsyncCallback<ArrayList<Client>>() {
+        clientsServiceAsync.getClients(whoseSession, showAcceptedCheckBox.getValue(), new AsyncCallback<ArrayList<Client>>() {
           @Override
           public void onFailure(Throwable throwable) {
             System.out.println("fail get clients from timer");
@@ -337,7 +339,7 @@ public class WidgetRenderingExample extends LayoutContainer {
         Button b = new Button("Редактировать", new SelectionListener<ButtonEvent>() {
           @Override
           public void componentSelected(ButtonEvent ce) {
-            DialogExample dialogExample = new DialogExample(model, store);
+            DialogExample dialogExample = new DialogExample(whoseSession, model, store);
             dialogExample.show();
           }
         });
@@ -495,7 +497,7 @@ public class WidgetRenderingExample extends LayoutContainer {
 //    column.setRenderer(removeButtonRenderer);
 //    configs.add(column);
 
-    clientsServiceAsync.getClients(isToShowAccepted, new AsyncCallback<ArrayList<Client>>() {
+    clientsServiceAsync.getClients(whoseSession, isToShowAccepted, new AsyncCallback<ArrayList<Client>>() {
       @Override
       public void onFailure(Throwable throwable) {
         System.out.println("faile getting clients");

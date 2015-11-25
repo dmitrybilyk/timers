@@ -50,13 +50,13 @@ public class ClientsHolder {
     clientMap.get(id).setAccepted(true);
   }
 
-  public ArrayList<Client> getClients(boolean isToShowAccepted) {
+  public ArrayList<Client> getClients(WhoseSessionEnum whoseSession, boolean isToShowAccepted) {
     ArrayList<Client> clientArrayList = new ArrayList<Client>();
     for (Client client: clientMap.values()) {
-      if (isToShowAccepted) {
+      if (isToShowAccepted && whoseSession == client.getWhoseSession()) {
         clientArrayList.add(client);
       } else {
-        if (!client.isAccepted()) {
+        if (!client.isAccepted() && whoseSession == client.getWhoseSession()) {
           clientArrayList.add(client);
         }
       }

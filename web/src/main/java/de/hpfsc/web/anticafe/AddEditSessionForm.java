@@ -68,12 +68,14 @@ public class AddEditSessionForm extends LayoutContainer {
   FormPanel simple;
   String oldName;
   String oldOwnerName;
+  private WhoseSessionEnum whoseSession;
   private DialogExample dialogExample;
   private ListStore<Client> store;
   private ClientsServiceAsync clientsServiceAsync = GWT.create(ClientsService.class);
   private NamesServiceAsync namesServiceAsync = GWT.create(NamesService.class);
 
-  public AddEditSessionForm(DialogExample dialogExample, Client client, ListStore<Client> store) {
+  public AddEditSessionForm(final WhoseSessionEnum whoseSession, DialogExample dialogExample, Client client, ListStore<Client> store) {
+    this.whoseSession = whoseSession;
     this.dialogExample = dialogExample;
     this.store = store;
     oldName = client.getName();
@@ -100,7 +102,7 @@ public class AddEditSessionForm extends LayoutContainer {
       }
     });
 
-    namesServiceAsync.getFreeOwnersNames(new AsyncCallback<List<String>>() {
+    namesServiceAsync.getAllOwnersNames(new AsyncCallback<List<String>>() {
       @Override
       public void onFailure(Throwable throwable) {
         System.out.println("fail load free owners names");
@@ -111,9 +113,10 @@ public class AddEditSessionForm extends LayoutContainer {
         for (String name : freeNames) {
           simpleOwnerCombo.add(name);
         }
-        simpleOwnerCombo.setSimpleValue(currentClient.getWhoseSession().name());
+        simpleOwnerCombo.setSimpleValue(whoseSession.name());
       }
     });
+    simpleOwnerCombo.setTriggerAction(TriggerAction.ALL);
     simpleNameCombo.setTriggerAction(TriggerAction.ALL);
     comment.setValue(currentClient.getComment());
 

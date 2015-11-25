@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import de.hpfsc.shared.FieldVerifier;
+import de.hpfsc.web.anticafe.LoginPage;
 import de.hpfsc.web.dialogs.LoginDialog;
 import de.hpfsc.web.panels.BasicTabExample;
 import de.hpfsc.web.panels.BorderLayoutExample;
@@ -64,17 +65,15 @@ public class parent implements EntryPoint {
 
 
     ContentPanel centerPanel = new ContentPanel();
+    centerPanel.setHeaderVisible(false);
     centerPanel.setLayout(new CenterLayout());
     centerPanel.add(new LoginDialog());
-//    centerPanel.setFrame(true);
-    centerPanel.setHeight(700);
+    centerPanel.setHeight(500);
     centerPanel.setWidth("100%");
-//    centerPanel.setSize(800, 1000);
-//    centerPanel.setSize("100%", "100%");
-//    centerPanel.layout();
-//    RootPanel.get().add(centerPanel);
+    RootPanel.get().add(centerPanel);
 //    RootPanel.get().add(new BorderLayoutExample());
-    RootPanel.get().add(new BasicTabExample());
+//    RootPanel.get().add(new BasicTabExample());
+//    RootPanel.get().add(new LoginDialog());
 //    DialogBox dialogBox2 = new DialogBox();
 //    dialogBox2.show();
 //    RootPanel.get().add(new DialogBox());
