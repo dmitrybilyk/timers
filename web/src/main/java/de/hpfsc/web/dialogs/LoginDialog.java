@@ -24,7 +24,6 @@ import com.google.gwt.user.client.ui.RootPanel;
 import de.hpfsc.web.GreetingService;
 import de.hpfsc.web.GreetingServiceAsync;
 import de.hpfsc.web.panels.BasicTabExample;
-import de.hpfsc.web.panels.BorderLayoutExample;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +43,7 @@ public class LoginDialog extends Dialog {
   private Button cleanButton;
   private Button cancelButton;
 
+  private List<String> usersNamesList = Arrays.asList("admin", "first", "second");
 //  private final LoginClient client;
 
   private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
@@ -82,6 +82,7 @@ public class LoginDialog extends Dialog {
     setHeadingText("Logining...");
     getHeader().addStyleName("text-align-center");
     setBodyStyle("padding: 8px");
+    setBorders(false);
     setWidth(350);
     setResizable(false);
     setModal(true);
@@ -148,23 +149,29 @@ public class LoginDialog extends Dialog {
     loginButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
       @Override
       public void componentSelected(ButtonEvent ce) {
-        List<String> usersList = Arrays.asList("admin", "first", "second");
-        String userName = userNameTextField.getValue();
-        if (userName != null && usersList.contains(userName)) {
-          BasicTabExample basicTabExample = new BasicTabExample(userName);
-          basicTabExample.show();
-          LoginDialog.this.getParent().removeFromParent();
-//          LoginDialog.this.hide();
-          RootPanel.get().add(basicTabExample);
-        } else {
-          userNameTextField.setValue(null);
-        }
+
+        login();
 
       }
     });
 
+    userNameTextField.focus();
+
     createLoginFieldValidation();
     createPasswordFieldValidation();
+  }
+
+  private void login() {
+    String userName = userNameTextField.getValue();
+    if (userName != null && usersNamesList.contains(userName)) {
+      BasicTabExample basicTabExample = new BasicTabExample(userName);
+      basicTabExample.show();
+      LoginDialog.this.getParent().removeFromParent();
+//          LoginDialog.this.hide();
+      RootPanel.get().add(basicTabExample);
+    } else {
+      userNameTextField.setValue(null);
+    }
   }
 
   private void createLoginFieldValidation() {
@@ -175,10 +182,19 @@ public class LoginDialog extends Dialog {
     userNameTextField.addListener(Events.OnBlur, new Listener<BaseEvent>() {
       @Override
       public void handleEvent(BaseEvent be) {
-        if (getUsername().isEmpty()) {
-          userNameTextField.markInvalid("user name is invalid");
+        if (getUsername().isEmpty() || !usersNamesList.contains(getUsername())) {
+          userNameTextField.markInvalid("User name is invalid");
         } else {
           userNameTextField.clearInvalid();
+        }
+      }
+    });
+
+    userNameTextField.addKeyListener(new KeyListener(){
+      @Override
+      public void componentKeyPress(ComponentEvent event) {
+        if (event.getKeyCode() == KeyCodes.KEY_ENTER) {
+          clickLoginButton();
         }
       }
     });
@@ -192,6 +208,14 @@ public class LoginDialog extends Dialog {
           passwordTextField.markInvalid("pass is wrong");
         } else {
           passwordTextField.clearInvalid();
+        }
+      }
+    });
+    passwordTextField.addKeyListener(new KeyListener() {
+      @Override
+      public void componentKeyPress(ComponentEvent event) {
+        if (event.getKeyCode() == KeyCodes.KEY_ENTER) {
+          clickLoginButton();
         }
       }
     });
@@ -433,12 +457,8 @@ public class LoginDialog extends Dialog {
      passwordTextField.setValue( password );
   }
 
-  protected boolean clickLoginButton() {
-      if( loginButton != null) {
-          loginButton.fireEvent( Events.OnClick );
-          return true;
-      }
-      return false;
+  protected void clickLoginButton() {
+      login();
   }
 
   protected boolean clickCleanButton() {

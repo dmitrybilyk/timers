@@ -1195,7 +1195,8 @@ td.x-date-mp-sel a {
 .x-panel-header {
   color:#15428b;
   font-weight:bold;
-  font-size: 11px;
+  font-size: 16px;
+  text-align: center;
   font-family: tahoma,arial,verdana,sans-serif;
   border-color:#99bbe8;
   background-image: url(resources/images/default/panel/white-top-bottom.gif);
@@ -3051,4 +3052,13 @@ h1 {
 
 .background-color-lightgreen {
   background-color: lightgreen;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.align-center {
+  text-align: center;
+  font-size: 18px;
 }

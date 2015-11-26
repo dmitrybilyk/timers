@@ -13,7 +13,7 @@ public interface ClientsServiceAsync {
   void updateSession(long id, String name, String comment, AsyncCallback<Void> async);
   void updateSessionOwner(long id, WhoseSessionEnum whoseSession, AsyncCallback<Void> async);
 
-  void getClients(WhoseSessionEnum whoseSession, boolean isToShowAccepted, AsyncCallback<ArrayList<Client>> async);
+  void getClients(WhoseSessionEnum whoseSession, Boolean value, boolean isToShowAccepted, AsyncCallback<ArrayList<Client>> async);
 
   void removeSession(long id, AsyncCallback<Void> async);
   void markSessionAsDeleted(long id, AsyncCallback<Void> async);

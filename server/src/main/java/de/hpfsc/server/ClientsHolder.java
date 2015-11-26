@@ -50,14 +50,24 @@ public class ClientsHolder {
     clientMap.get(id).setAccepted(true);
   }
 
-  public ArrayList<Client> getClients(WhoseSessionEnum whoseSession, boolean isToShowAccepted) {
+  public ArrayList<Client> getClients(WhoseSessionEnum whoseSession, Boolean isAdminSeesAll, boolean isToShowAccepted) {
     ArrayList<Client> clientArrayList = new ArrayList<Client>();
     for (Client client: clientMap.values()) {
-      if (isToShowAccepted && whoseSession == client.getWhoseSession()) {
-        clientArrayList.add(client);
-      } else {
-        if (!client.isAccepted() && whoseSession == client.getWhoseSession()) {
+      if (WhoseSessionEnum.ADMIN == whoseSession && isAdminSeesAll) {
+        if (isToShowAccepted ) {
           clientArrayList.add(client);
+        } else {
+          if (!client.isAccepted()) {
+            clientArrayList.add(client);
+          }
+        }
+      } else {
+        if (isToShowAccepted && whoseSession == client.getWhoseSession()) {
+          clientArrayList.add(client);
+        } else {
+          if (!client.isAccepted() && whoseSession == client.getWhoseSession()) {
+            clientArrayList.add(client);
+          }
         }
       }
     }

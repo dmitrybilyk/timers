@@ -8,14 +8,17 @@
 package de.hpfsc.web.anticafe;
 
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
+import com.extjs.gxt.ui.client.data.BeanModel;
 import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.GridEvent;
 import com.extjs.gxt.ui.client.event.Listener;
+import com.extjs.gxt.ui.client.event.RowEditorEvent;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.store.ListStore;
+import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.BoxComponent;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
@@ -23,18 +26,23 @@ import com.extjs.gxt.ui.client.widget.Info;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.CheckBox;
+import com.extjs.gxt.ui.client.widget.form.ComboBox;
 import com.extjs.gxt.ui.client.widget.form.LabelField;
 import com.extjs.gxt.ui.client.widget.form.SimpleComboBox;
+import com.extjs.gxt.ui.client.widget.form.SimpleComboValue;
+import com.extjs.gxt.ui.client.widget.form.TextArea;
+import com.extjs.gxt.ui.client.widget.form.TextField;
 import com.extjs.gxt.ui.client.widget.grid.CellEditor;
 import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
 import com.extjs.gxt.ui.client.widget.grid.ColumnData;
 import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
+import com.extjs.gxt.ui.client.widget.grid.EditorGrid;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
 import com.extjs.gxt.ui.client.widget.grid.RowEditor;
+import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.layout.HBoxLayoutData;
-import com.extjs.gxt.ui.client.widget.toolbar.LabelToolItem;
 import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -47,6 +55,9 @@ import de.hpfsc.shared.ClientNamesEnum;
 import de.hpfsc.shared.WhoseSessionEnum;
 import de.hpfsc.web.ClientsService;
 import de.hpfsc.web.ClientsServiceAsync;
+import de.hpfsc.web.NamesService;
+import de.hpfsc.web.NamesServiceAsync;
+import de.hpfsc.web.panels.BorderLayoutExample;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -57,15 +68,21 @@ public class WidgetRenderingExample extends LayoutContainer {
   private  Grid<Client> grid;
   private RowEditor<ModelData> rowEditor;
   private  SimpleComboBox<String> nameEditor;
+  private  SimpleComboBox<String> ownerEditor;
+  private TextField<String> commentEditor;
   final ListStore<Client> store = new ListStore<Client>();
   private ClientsServiceAsync clientsServiceAsync = GWT.create(ClientsService.class);
+  private NamesServiceAsync namesServiceAsync = GWT.create(NamesService.class);
   private boolean isToShowAccepted;
   private CheckBox showAcceptedCheckBox;
+  private CheckBox isAdminSeesAll;
   private LabelField totalSumLabel = new LabelField("0.00");
   private WhoseSessionEnum whoseSession;
+  private BorderLayoutExample borderLayoutExample;
 
-  public WidgetRenderingExample(String userName) {
+  public WidgetRenderingExample(String userName, BorderLayoutExample borderLayoutExample) {
     whoseSession = WhoseSessionEnum.valueOf(userName.toUpperCase());
+    this.borderLayoutExample = borderLayoutExample;
   }
 
 
@@ -76,7 +93,7 @@ public class WidgetRenderingExample extends LayoutContainer {
     final Timer updateClientsTimer = new Timer() {
       @Override
       public void run() {
-        clientsServiceAsync.getClients(whoseSession, showAcceptedCheckBox.getValue(), new AsyncCallback<ArrayList<Client>>() {
+        clientsServiceAsync.getClients(whoseSession, isAdminSeesAll.getValue(), showAcceptedCheckBox.getValue(), new AsyncCallback<ArrayList<Client>>() {
           @Override
           public void onFailure(Throwable throwable) {
             System.out.println("fail get clients from timer");
@@ -154,7 +171,19 @@ public class WidgetRenderingExample extends LayoutContainer {
 
       public Object render(final Client model, String property, ColumnData config, final int rowIndex,
                            final int colIndex, ListStore<Client> store, Grid<Client> grid) {
-        return new LabelField(model.getName());
+        LabelField labelField = new LabelField(model.getName());
+        labelField.setWidth(50);
+        return labelField;
+      }
+    };
+
+    GridCellRenderer<Client> commentCellRenderer = new GridCellRenderer<Client>() {
+
+      public Object render(final Client model, String property, ColumnData config, final int rowIndex,
+                           final int colIndex, ListStore<Client> store, Grid<Client> grid) {
+        LabelField labelField = new LabelField(model.getComment());
+        labelField.setTitle(model.getComment());
+        return labelField;
       }
     };
 
@@ -412,6 +441,9 @@ public class WidgetRenderingExample extends LayoutContainer {
     ColumnConfig column = new ColumnConfig();
     column.setId("owner");
     column.setHeaderHtml("Кому принадлежит");
+    ownerEditor = new SimpleComboBox<>();
+    ownerEditor.setTriggerAction(ComboBox.TriggerAction.ALL);
+    column.setEditor(new CellEditor(ownerEditor));
     column.setRenderer(ownerCellRenderer);
     column.setWidth(90);
     configs.add(column);
@@ -421,8 +453,18 @@ public class WidgetRenderingExample extends LayoutContainer {
     column.setHeaderHtml("Псевдоним");
     column.setRenderer(nameCellRenderer);
     nameEditor = new SimpleComboBox<>();
+    nameEditor.setTriggerAction(ComboBox.TriggerAction.ALL);
     column.setEditor(new CellEditor(nameEditor));
-    column.setWidth(100);
+    column.setWidth(50);
+    configs.add(column);
+
+    column = new ColumnConfig();
+    column.setId("comment");
+    column.setHeaderHtml("Комментарий");
+    column.setRenderer(commentCellRenderer);
+    commentEditor = new TextField<>();
+    column.setEditor(new CellEditor(commentEditor));
+    column.setWidth(140);
     configs.add(column);
 
 //    column = new ColumnConfig();
@@ -497,7 +539,10 @@ public class WidgetRenderingExample extends LayoutContainer {
 //    column.setRenderer(removeButtonRenderer);
 //    configs.add(column);
 
-    clientsServiceAsync.getClients(whoseSession, isToShowAccepted, new AsyncCallback<ArrayList<Client>>() {
+    isAdminSeesAll = new CheckBox();
+    isAdminSeesAll.setValue(WhoseSessionEnum.ADMIN == whoseSession);
+
+    clientsServiceAsync.getClients(whoseSession, isAdminSeesAll.getValue(), isToShowAccepted, new AsyncCallback<ArrayList<Client>>() {
       @Override
       public void onFailure(Throwable throwable) {
         System.out.println("faile getting clients");
@@ -520,6 +565,7 @@ public class WidgetRenderingExample extends LayoutContainer {
 //    cp.setHeadingHtml("Widget Renderer Grid");
     cp.setHeaderVisible(false);
     cp.setButtonAlign(HorizontalAlignment.CENTER);
+    cp.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
     cp.setLayout(new FitLayout());
     cp.setSize(1100, 300);
 
@@ -528,7 +574,7 @@ public class WidgetRenderingExample extends LayoutContainer {
     LayoutContainer totalSumContainer = new LayoutContainer();
     totalSumContainer.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
     HBoxLayoutData layoutData = new HBoxLayoutData();
-    layoutData.setMargins(new Margins(2));
+    layoutData.setMargins(new Margins(3));
     totalSumContainer.setLayoutData(layoutData);
 //    totalSumContainer.setSize(60, 30);
 //    totalSumLabel = new LabelField();
@@ -540,9 +586,9 @@ public class WidgetRenderingExample extends LayoutContainer {
     ToolBar toolBar = new ToolBar();
     toolBar.getAriaSupport().setLabel("Grid Options");
 
-    toolBar.add(new LabelToolItem("Показывать архивные: "));
+//    toolBar.add(new LabelToolItem("Показывать архивные: "));
     showAcceptedCheckBox = new CheckBox();
-    showAcceptedCheckBox.setFieldLabel("Показывать принятые");
+//    showAcceptedCheckBox.setFieldLabel("Показывать принятые");
     showAcceptedCheckBox.addListener(Events.Select, new Listener<BaseEvent>() {
       @Override
       public void handleEvent(BaseEvent be) {
@@ -550,9 +596,27 @@ public class WidgetRenderingExample extends LayoutContainer {
       }
     });
 
-    toolBar.add(showAcceptedCheckBox);
-    totalSumContainer.add(toolBar);
+//    toolBar.add(showAcceptedCheckBox);
+//    totalSumContainer.add(toolBar);
+    totalSumContainer.setLayout(new CenterLayout());
+//    borderLayoutExample.getCenter().add(new LabelField("Паказывать архивные:"));
+//    HorizontalPanel toShowArchivedPanel = new HorizontalPanel();
+//    toShowArchivedPanel.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+//    toShowArchivedPanel.addStyleName("align-center");
+    borderLayoutExample.getCenter().add(new LabelField("Показывать архивные: "));
+    borderLayoutExample.getCenter().add(showAcceptedCheckBox);
+//    borderLayoutExample.getCenter().add(toShowArchivedPanel);
     cp.setTopComponent(totalSumContainer);
+    cp.getTopComponent().addStyleName("align-right");
+
+
+    if (WhoseSessionEnum.ADMIN == whoseSession) {
+      borderLayoutExample.getWest().add(new LabelField("Админ видит все: "));
+      borderLayoutExample.getWest().add(isAdminSeesAll);
+    }
+
+
+    borderLayoutExample.getEast().add(totalSumLabel);
 
 
     grid = new Grid<Client>(store, cm);
@@ -563,19 +627,102 @@ public class WidgetRenderingExample extends LayoutContainer {
     rowEditor.addListener(Events.BeforeEdit, new Listener<BaseEvent>() {
       @Override
       public void handleEvent(BaseEvent be) {
+        final Client currentClient = (Client) ((RowEditorEvent) be).getRecord().getModel();
         nameEditor.removeAll();
-        for (ClientNamesEnum clientName: ClientNamesEnum.values()) {
-          if (!isStoreContainsName(clientName.name())) {
-            nameEditor.add(clientName.name());
+        namesServiceAsync.getFreeNames(new AsyncCallback<List<String>>() {
+          @Override
+          public void onFailure(Throwable throwable) {
+            System.out.println("faile obtaining free names");
           }
-        }
+
+          @Override
+          public void onSuccess(List<String> strings) {
+            for (String string : strings) {
+              nameEditor.add(string);
+            }
+            String currentClientName = currentClient.getName();
+            if (currentClientName != null) {
+              if (!isCurrentNameAlreadyPresentInCombo(currentClientName)) {
+                nameEditor.add(currentClientName);
+              }
+              nameEditor.setSimpleValue(currentClientName);
+            }
+          }
+        });
+
+        ownerEditor.removeAll();
+        namesServiceAsync.getAllOwnersNames(new AsyncCallback<List<String>>() {
+          @Override
+          public void onFailure(Throwable throwable) {
+            System.out.println("faile obtaining all owners names");
+          }
+
+          @Override
+          public void onSuccess(List<String> strings) {
+            for (String string : strings) {
+              ownerEditor.add(string);
+            }
+            if (currentClient.getId() == null) {
+              ownerEditor.setSimpleValue(whoseSession.name());
+            } else {
+              ownerEditor.setSimpleValue(currentClient.getWhoseSession().name());
+            }
+          }
+        });
+
+        commentEditor.setValue(currentClient.getComment());
       }
     });
+//    rowEditor.addListener(Events.AfterEdit, new Listener<BaseEvent>() {
+//      @Override
+//      public void handleEvent(BaseEvent be) {
+//        nameEditor.removeAll();
+//        for (ClientNamesEnum clientName: ClientNamesEnum.values()) {
+//          if (!isStoreContainsName(clientName.name())) {
+//            nameEditor.add(clientName.name());
+//          }
+//        }
+//      }
+//    });
+    rowEditor.setClicksToEdit(EditorGrid.ClicksToEdit.TWO);
+
+    rowEditor.addListener(Events.AfterEdit, new Listener<RowEditorEvent>() {
+      @Override
+      public void handleEvent(RowEditorEvent ree) {
+        final Record record = ree.getRecord();
+        final Client newModel = (Client) record.getModel();
+        newModel.set("name", nameEditor.getSimpleValue());
+        newModel.set("owner", ownerEditor.getSimpleValue());
+        newModel.set("comment", commentEditor.getValue());
+        clientsServiceAsync.updateClient(newModel, new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable throwable) {
+            System.out.println("faile update client");
+          }
+
+          @Override
+          public void onSuccess(Void aVoid) {
+            System.out.println("success update client from editor");
+            record.endEdit();
+          }
+        });
+      }
+    });
+
     grid.addPlugin(rowEditor);
     grid.setBorders(true);
     cp.add(grid);
 
     add(cp);
+  }
+
+  private boolean isCurrentNameAlreadyPresentInCombo(String currentClientName) {
+    for(SimpleComboValue simpleComboValue: nameEditor.getStore().getModels()) {
+      if (simpleComboValue.getValue().equals(currentClientName)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private boolean isStoreContainsName(String name) {

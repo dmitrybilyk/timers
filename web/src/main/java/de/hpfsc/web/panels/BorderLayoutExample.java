@@ -4,12 +4,14 @@ import com.extjs.gxt.ui.client.Style.LayoutRegion;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
-import com.extjs.gxt.ui.client.widget.LayoutContainer;  
+import com.extjs.gxt.ui.client.widget.HorizontalPanel;
+import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.LabelField;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
 import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.RootPanel;
 import de.hpfsc.shared.Client;
@@ -21,6 +23,22 @@ import de.hpfsc.web.dialogs.LoginDialog;
 public class BorderLayoutExample extends LayoutContainer {
 
   String userName;
+  LayoutContainer eastContainer;
+
+  public LayoutContainer getEast() {
+    return eastContainer;
+  }
+
+  LayoutContainer centerLayoutContainer;
+  public LayoutContainer getCenter() {
+    return centerLayoutContainer;
+  }
+
+  LayoutContainer westLayoutContainer;
+  public LayoutContainer getWest() {
+    return westLayoutContainer;
+  }
+
   public BorderLayoutExample(String userName) {
     this.userName = userName;
   }
@@ -56,14 +74,17 @@ public class BorderLayoutExample extends LayoutContainer {
       }
     });
 //    north.add(new SessionsGrid(), new BorderLayoutData(LayoutRegion.CENTER, 350));
-    north.add(new WidgetRenderingExample(userName), new BorderLayoutData(LayoutRegion.CENTER, 350));
+    north.add(new WidgetRenderingExample(userName, BorderLayoutExample.this), new BorderLayoutData(LayoutRegion.CENTER, 350));
 
     north.add(createSessionButton, new BorderLayoutData(LayoutRegion.SOUTH, 100));
     ContentPanel west = new ContentPanel();
+    westLayoutContainer = new LayoutContainer();
+    westLayoutContainer.addStyleName("align-center");
     west.setHeight(200);
     west.setHeaderVisible(true);
     west.setHeadingHtml("Инфо");
-    west.add(new LabelField("Имя пользователя здесь"));
+    westLayoutContainer.add(new LabelField("Имя пользователя здесь"));
+    west.add(westLayoutContainer);
     Button logoutButton = new Button("Выход");
     logoutButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
       @Override
@@ -84,7 +105,9 @@ public class BorderLayoutExample extends LayoutContainer {
     center.setHeaderVisible(true);
     center.setHeight(200);
     center.setWidth(500);
-    center.add(new LabelField("center"));
+    centerLayoutContainer = new HorizontalPanel();
+    centerLayoutContainer.addStyleName("align-center");
+    center.add(centerLayoutContainer);
     center.setHeadingHtml("Диапазон дат");
 //    center.setScrollMode(Scroll.AUTOX);
   
@@ -124,10 +147,17 @@ public class BorderLayoutExample extends LayoutContainer {
 //    center.add(table);
   
     ContentPanel east = new ContentPanel();
+    eastContainer = new LayoutContainer();
+    eastContainer.addStyleName("align-center");
+    eastContainer.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+    eastContainer.getElement().getStyle().setFontSize(20, Style.Unit.PX);
+    east.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+    east.getElement().getStyle().setFontSize(16, Style.Unit.PX);
     east.setHeaderVisible(true);
     east.setHeadingHtml("Итоги");
     east.setHeight(200);
-    east.add(new LabelField("east"));
+    east.add(eastContainer);
+    eastContainer.add(new LabelField("Сумма всего:"));
     ContentPanel south = new ContentPanel();
 //    south.setWidth(600);
     south.setHeaderVisible(false);

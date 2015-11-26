@@ -113,7 +113,13 @@ public class AddEditSessionForm extends LayoutContainer {
         for (String name : freeNames) {
           simpleOwnerCombo.add(name);
         }
-        simpleOwnerCombo.setSimpleValue(whoseSession.name());
+        simpleOwnerCombo.setFieldLabel("Кому принадлежит");
+        if (currentClient.getId() == null) {
+          simpleOwnerCombo.setSimpleValue(whoseSession.name());
+        } else {
+          simpleOwnerCombo.setSimpleValue(currentClient.getWhoseSession().name());
+        }
+//        simpleOwnerCombo.setSimpleValue(whoseSession.name());
       }
     });
     simpleOwnerCombo.setTriggerAction(TriggerAction.ALL);
@@ -161,8 +167,8 @@ public class AddEditSessionForm extends LayoutContainer {
       }  
     };
 
-    simpleOwnerCombo.setFieldLabel("Кому принадлежит");
-    simpleOwnerCombo.setSimpleValue(WhoseSessionEnum.ADMIN.name());
+
+
     simple.add(simpleOwnerCombo);
 
 

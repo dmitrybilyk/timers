@@ -66,9 +66,10 @@ public class parent implements EntryPoint {
 
     ContentPanel centerPanel = new ContentPanel();
     centerPanel.setHeaderVisible(false);
+    centerPanel.setFrame(false);
     centerPanel.setLayout(new CenterLayout());
     centerPanel.add(new LoginDialog());
-    centerPanel.setHeight(500);
+    centerPanel.setHeight(600);
     centerPanel.setWidth("100%");
     RootPanel.get().add(centerPanel);
 //    RootPanel.get().add(new BorderLayoutExample());
