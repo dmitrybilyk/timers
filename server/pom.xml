@@ -13,12 +13,24 @@
     <artifactId>server</artifactId>
     <packaging>jar</packaging>
 
+    <repositories>
+        <!--<repository>-->
+            <!--<id>objectify-appengine</id>-->
+            <!--<url>http://maven.objectify-appengine.googlecode.com/git/</url>-->
+        <!--</repository>-->
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>de.hpfsc</groupId>
             <artifactId>shared</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.googlecode.objectify</groupId>-->
+            <!--<artifactId>objectify</artifactId>-->
+            <!--<version>3.1</version>-->
+        <!--</dependency>-->
     </dependencies>
 
     <build>

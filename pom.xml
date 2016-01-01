@@ -71,7 +71,7 @@ http://maven.apache.org/maven-v4_0_0.xsd">
 
     <build>
     
-        <defaultGoal>clean install  tomcat7:run-war-only</defaultGoal>
+        <!--<defaultGoal>clean install  tomcat7:run-war-only</defaultGoal>-->
     
         <plugins>
             <plugin>
@@ -93,19 +93,19 @@ http://maven.apache.org/maven-v4_0_0.xsd">
                     <target>1.7</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.tomcat.maven</groupId>
-                <artifactId>tomcat7-maven-plugin</artifactId>
-                <version>2.0</version>
-                <configuration>
-                    <path>${tomcat.context}</path>
-                    <port>${tomcat.webport}</port>
-                    <ajpPort>${tomcat.ajpport}</ajpPort>
-                    <systemProperties>
-                        <JAVA_OPTS>-XX:MaxPermSize=512m</JAVA_OPTS>
-                    </systemProperties>
-                </configuration>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.tomcat.maven</groupId>-->
+                <!--<artifactId>tomcat7-maven-plugin</artifactId>-->
+                <!--<version>2.0</version>-->
+                <!--<configuration>-->
+                    <!--<path>${tomcat.context}</path>-->
+                    <!--<port>${tomcat.webport}</port>-->
+                    <!--<ajpPort>${tomcat.ajpport}</ajpPort>-->
+                    <!--<systemProperties>-->
+                        <!--<JAVA_OPTS>-XX:MaxPermSize=512m</JAVA_OPTS>-->
+                    <!--</systemProperties>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 </project>

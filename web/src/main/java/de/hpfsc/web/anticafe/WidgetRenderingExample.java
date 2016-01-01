@@ -66,7 +66,7 @@ import java.util.List;
 public class WidgetRenderingExample extends LayoutContainer {
 
   private  Grid<Client> grid;
-  private RowEditor<ModelData> rowEditor;
+  private ScorecardRowEditor rowEditor;
   private  SimpleComboBox<String> nameEditor;
   private  SimpleComboBox<String> ownerEditor;
   private TextField<String> commentEditor;
@@ -623,7 +623,12 @@ public class WidgetRenderingExample extends LayoutContainer {
 //    grid.setWidth("100%");
     grid.setStyleAttribute("borderTop", "none");
     grid.setAutoExpandColumn("name");
-    rowEditor = new RowEditor<>();
+    rowEditor = new ScorecardRowEditor() {
+      @Override
+      public void stopEditing(boolean saveChanges) {
+        super.stopEditing(false);
+      }
+    };
     rowEditor.addListener(Events.BeforeEdit, new Listener<BaseEvent>() {
       @Override
       public void handleEvent(BaseEvent be) {
@@ -670,6 +675,7 @@ public class WidgetRenderingExample extends LayoutContainer {
           }
         });
 
+        commentEditor.setOriginalValue(currentClient.getComment());
         commentEditor.setValue(currentClient.getComment());
       }
     });
@@ -692,8 +698,11 @@ public class WidgetRenderingExample extends LayoutContainer {
         final Record record = ree.getRecord();
         final Client newModel = (Client) record.getModel();
         newModel.set("name", nameEditor.getSimpleValue());
-        newModel.set("owner", ownerEditor.getSimpleValue());
+        newModel.set("owner", WhoseSessionEnum.valueOf(ownerEditor.getSimpleValue()));
         newModel.set("comment", commentEditor.getValue());
+        newModel.setName(nameEditor.getSimpleValue());
+        newModel.setWhoseSession(WhoseSessionEnum.valueOf(ownerEditor.getSimpleValue()));
+        newModel.setComment(commentEditor.getValue());
         clientsServiceAsync.updateClient(newModel, new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable throwable) {
@@ -703,7 +712,6 @@ public class WidgetRenderingExample extends LayoutContainer {
           @Override
           public void onSuccess(Void aVoid) {
             System.out.println("success update client from editor");
-            record.endEdit();
           }
         });
       }
