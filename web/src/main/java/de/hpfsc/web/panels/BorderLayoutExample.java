@@ -74,6 +74,16 @@ public class BorderLayoutExample extends LayoutContainer {
       }
     });
 //    north.add(new SessionsGrid(), new BorderLayoutData(LayoutRegion.CENTER, 350));
+    north.removeStyleName("admin-style");
+    north.removeStyleName("first-user-style");
+    north.removeStyleName("second-user-style");
+    if (userName.equals("admin")) {
+      north.addStyleName("admin-style");
+    } else if (userName.equals("first")){
+      north.addStyleName("first-user-style");
+    } else if (userName.equals("second")) {
+      north.addStyleName("second-user-style");
+    }
     north.add(new WidgetRenderingExample(userName, BorderLayoutExample.this), new BorderLayoutData(LayoutRegion.CENTER, 350));
 
     north.add(createSessionButton, new BorderLayoutData(LayoutRegion.SOUTH, 100));

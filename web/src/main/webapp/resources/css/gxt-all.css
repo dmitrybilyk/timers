@@ -6129,6 +6129,18 @@ body.x-body-masked .x-window-plain .x-window-mc {
     background-color:#dfe8f6;
 }
 
+.admin-style .x-border-layout-ct {
+  background-color:red;
+}
+
+.first-user-style .x-border-layout-ct {
+  background-color:green;
+}
+
+.second-user-style .x-border-layout-ct {
+  background-color:yellow;
+}
+
 .x-layout-collapsed{
     background-color:#d2e0f2;
 	border-color:#98c0f4;

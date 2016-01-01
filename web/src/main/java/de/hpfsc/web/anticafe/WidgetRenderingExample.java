@@ -8,8 +8,6 @@
 package de.hpfsc.web.anticafe;
 
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
-import com.extjs.gxt.ui.client.data.BeanModel;
-import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.Events;
@@ -30,7 +28,6 @@ import com.extjs.gxt.ui.client.widget.form.ComboBox;
 import com.extjs.gxt.ui.client.widget.form.LabelField;
 import com.extjs.gxt.ui.client.widget.form.SimpleComboBox;
 import com.extjs.gxt.ui.client.widget.form.SimpleComboValue;
-import com.extjs.gxt.ui.client.widget.form.TextArea;
 import com.extjs.gxt.ui.client.widget.form.TextField;
 import com.extjs.gxt.ui.client.widget.grid.CellEditor;
 import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
@@ -39,7 +36,6 @@ import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
 import com.extjs.gxt.ui.client.widget.grid.EditorGrid;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
-import com.extjs.gxt.ui.client.widget.grid.RowEditor;
 import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.layout.HBoxLayoutData;
@@ -51,7 +47,6 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import de.hpfsc.shared.Client;
-import de.hpfsc.shared.ClientNamesEnum;
 import de.hpfsc.shared.WhoseSessionEnum;
 import de.hpfsc.web.ClientsService;
 import de.hpfsc.web.ClientsServiceAsync;
@@ -79,6 +74,7 @@ public class WidgetRenderingExample extends LayoutContainer {
   private LabelField totalSumLabel = new LabelField("0.00");
   private WhoseSessionEnum whoseSession;
   private BorderLayoutExample borderLayoutExample;
+  private long maxTime = 60 * 2;
 
   public WidgetRenderingExample(String userName, BorderLayoutExample borderLayoutExample) {
     whoseSession = WhoseSessionEnum.valueOf(userName.toUpperCase());
@@ -263,7 +259,7 @@ public class WidgetRenderingExample extends LayoutContainer {
         Button b = new Button("Stop", new SelectionListener<ButtonEvent>() {
           @Override
           public void componentSelected(ButtonEvent ce) {
-            clientsServiceAsync.stopSession(model.getId(), model.getTotalSum(), new AsyncCallback<Void>() {
+            clientsServiceAsync.stopSession(model.getId(), model.getTotalSum(), false, new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable throwable) {
                 System.out.println("fail stop");
@@ -292,10 +288,11 @@ public class WidgetRenderingExample extends LayoutContainer {
         Long stopTime = model.getStopTime();
 
         Long endTime = null;
-
-        if (!model.isInProgress() && stopTime != 0 && model.getStartTime() != 0) {
+        if (!model.isInProgress() && stopTime != 0 && model.getStartTime() != 0 && !model.isExpired()) {
           endTime = stopTime;
           timeLabel.setValue(getMinutesString(endTime - model.getStartTime()));
+        }else if (model.isExpired()) {
+          // do nothing here
         } else if (model.isInProgress()) {
           endTime = System.currentTimeMillis();
           timeLabel.setValue(getMinutesString(endTime - model.getStartTime()));
@@ -551,7 +548,7 @@ public class WidgetRenderingExample extends LayoutContainer {
       @Override
       public void onSuccess(ArrayList<Client> clients) {
         store.add(clients);
-        updateClientsTimer.scheduleRepeating(1000);
+        updateClientsTimer.scheduleRepeating(3000);
       }
     });
 
@@ -771,19 +768,10 @@ public class WidgetRenderingExample extends LayoutContainer {
     }
   }
 
-  private void renderSumLabel(Client model, LabelField sumLabel) {
+  private void renderSumLabel(final Client model, LabelField sumLabel) {
     Long minTime = 60000l; // minimum period 1 minutes
     Long minPayment = 3500l;
-    Long stopTime = model.getStopTime();
-    Long endTime = null;
-    if (!model.isInProgress() && stopTime != 0) {
-      endTime = stopTime;
-    } else if (model.isInProgress()) {
-      endTime = System.currentTimeMillis();
-    }
-    Long currentTimeValue = endTime - model.getStartTime();
-//        totalTimeValue.setText(getMinutesString(currentTimeValue));
-    long currentIntervalSeconds = getSeconds(currentTimeValue);
+    long currentIntervalSeconds = getCurrentIntervalSeconds(model);
     //TODO
 //    if (currentIntervalSeconds > maxLength/1000) {
 //      stopSession();
@@ -798,17 +786,29 @@ public class WidgetRenderingExample extends LayoutContainer {
       totalSum = minPayment;
       sumLabel.setValue(getPrettyMoney(minPayment));
 //          totalSumCurrentValue = minPayment;
-    } else {
+    } else if (maxTime < currentIntervalSeconds && !model.isExpired()) {
+      clientsServiceAsync.stopSession(model.getId(), model.getTotalSum(), false, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable throwable) {
+          System.out.println("failed update client - time is over");
+        }
+
+        @Override
+        public void onSuccess(Void aVoid) {
+          System.out.println("Time is over - client - " + model.getName());
+        }
+      });
+    } else if (model.isInProgress()){
 //          if ((currentIntervalSeconds - minTime / 1000) % 60 == 0) {
 
 //            BigDecimal totalSum = BigDecimal.valueOf(totalSumCurrentValue + 50);
 //            totalSumCurrentValue = totalSum.longValue();
         totalSum = minPayment + 50 * (currentIntervalSeconds - minTime / 1000) / 60;
+        model.setTotalSum(totalSum);
 //            totalSumCurrentValue = totalSum;
         sumLabel.setValue(getPrettyMoney(totalSum));
 //          }
     }
-    model.setTotalSum(totalSum);
     clientsServiceAsync.updateClientSum(model, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -820,6 +820,19 @@ public class WidgetRenderingExample extends LayoutContainer {
         System.out.println("client is updated");
       }
     });
+  }
+
+  private long getCurrentIntervalSeconds(Client model) {
+    Long stopTime = model.getStopTime();
+    Long endTime = null;
+    if (!model.isInProgress() && stopTime != 0) {
+      endTime = stopTime;
+    } else if (model.isInProgress()) {
+      endTime = System.currentTimeMillis();
+    }
+    Long currentTimeValue = endTime - model.getStartTime();
+//        totalTimeValue.setText(getMinutesString(currentTimeValue));
+    return getSeconds(currentTimeValue);
   }
 
   private void toggleInprogressButtonStyle(Client model, Button b) {

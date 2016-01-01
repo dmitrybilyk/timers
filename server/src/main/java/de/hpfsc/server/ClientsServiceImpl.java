@@ -55,9 +55,10 @@ public class ClientsServiceImpl extends RemoteServiceServlet implements ClientsS
     client.setWhoseSession(whoseSession);
   }
 
-  public void stopSession(long id, long totalSum) {
+  public void stopSession(long id, long totalSum, boolean isExpired) {
     Client client = holder.getClientById(id);
     client.setInProgress(false);
+    client.setIsExpired(isExpired);
     client.setTotalSum(totalSum);
     client.setStopTime(System.currentTimeMillis());
   }
@@ -66,7 +67,7 @@ public class ClientsServiceImpl extends RemoteServiceServlet implements ClientsS
     Client client = holder.getClientById(acceptedClient.getId());
     if (client != null) {
       client.setAccepted(acceptedClient.isAccepted());
-      stopSession(acceptedClient.getId(), acceptedClient.getTotalSum());
+      stopSession(acceptedClient.getId(), acceptedClient.getTotalSum(), false);
     }
   }
 

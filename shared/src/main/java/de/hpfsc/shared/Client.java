@@ -28,6 +28,7 @@ public class Client extends BaseModel implements Serializable, Comparable {
   private long startTime;
   private long totalSum;
   private boolean isInProgress;
+  private boolean isExpired;
   private long limitTime = 1000 * 60 * 60 * 5;
   private boolean accepted;
   private boolean isDeleted;
@@ -114,6 +115,14 @@ public class Client extends BaseModel implements Serializable, Comparable {
 
   public void setInProgress(boolean isInProgress) {
     this.isInProgress = isInProgress;
+  }
+
+  public boolean isExpired() {
+    return isExpired;
+  }
+
+  public void setIsExpired(boolean isExpired) {
+    this.isExpired = isExpired;
   }
 
   public long getLimitTime() {

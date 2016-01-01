@@ -252,7 +252,7 @@ public class ClientSessionPanel extends Composite {
     stopSessionButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         stopSession();
-        clientsServiceAsync.stopSession(clientId, 0, new AsyncCallback<Void>() {
+        clientsServiceAsync.stopSession(clientId, 0, true, new AsyncCallback<Void>() {
           public void onFailure(Throwable caught) {
             String s = "sdfsd";
           }
@@ -457,7 +457,7 @@ public class ClientSessionPanel extends Composite {
   }
 
   public void stopSessionOnServer() {
-    clientsServiceAsync.stopSession(clientId, 0, new AsyncCallback<Void>() {
+    clientsServiceAsync.stopSession(clientId, 0, true, new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) {
         String s = "dfdsf";
       }
@@ -499,16 +499,15 @@ public class ClientSessionPanel extends Composite {
 //          totalSumCurrentValue = minPayment;
       totalSumValue.setText(getPrettyMoney(minPayment));
       totalSumCurrentValue = minPayment;
-    } else {
-      if ((currentIntervalSeconds - minTime / 1000) % 60 == 0) {
+    } else if ((currentIntervalSeconds - minTime / 1000) % 60 == 0) {
 
 //            BigDecimal totalSum = BigDecimal.valueOf(totalSumCurrentValue + 50);
 //            totalSumCurrentValue = totalSum.longValue();
         long totalSum = minPayment + 50 * (currentIntervalSeconds - minTime / 1000) / 60;
         totalSumCurrentValue = totalSum;
         totalSumValue.setText(getPrettyMoney(totalSum));
-      }
     }
+//    else if ()
   }
 
 
