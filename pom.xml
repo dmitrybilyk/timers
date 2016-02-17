@@ -46,7 +46,12 @@ http://maven.apache.org/maven-v4_0_0.xsd">
             <artifactId>gxt</artifactId>
             <version>2.3.1a-gwt22</version>
         </dependency>
-
+        <!-- GXT 4-->
+        <dependency>
+            <groupId>com.sencha.gxt</groupId>
+            <artifactId>gxt</artifactId>
+            <version>4.0.0</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

@@ -26,10 +26,15 @@
     <inherits name="com.extjs.gxt.charts.Chart"/>
     <inherits name="com.extjs.gxt.themes.Themes"/>
 
+    <inherits name="com.sencha.gxt.ui.GXT" />
+    <inherits name="com.google.gwt.resources.Resources" />
+
     <!-- Specify the paths for translatable code                    -->
     <source path='web'/>
     <!-- set browsers and locale -->
     <set-property name="user.agent" value="gecko1_8"/>
+    <set-configuration-property name="CssResource.enableGss" value="true" />
+    <set-configuration-property name="CssResource.legacy" value="true" />
     <!--<set-property name="locale" value="en_US"/>-->
 
 </module>

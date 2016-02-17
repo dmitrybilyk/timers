@@ -60,6 +60,8 @@
                     <noServer>true</noServer>
                     <port>${tomcat.webport}</port>
                     <runTarget>${tomcat.context}</runTarget>
+                    <extraJvmArgs>-Xms1768m -Xmx3768m</extraJvmArgs>
+                    <localWorkers>3</localWorkers>
                 </configuration>
             </plugin>
 
