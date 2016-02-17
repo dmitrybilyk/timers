@@ -13,8 +13,9 @@ import com.extjs.gxt.ui.client.widget.VerticalPanel;
 import com.google.gwt.core.client.GWT;  
 import com.google.gwt.http.client.RequestBuilder;  
 import com.google.gwt.user.client.Element;  
-import com.google.gwt.user.client.Window;  
-  
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Widget;
+
 public class BasicTabExample extends LayoutContainer {
 
   String whoseSession;
@@ -46,8 +47,11 @@ public class BasicTabExample extends LayoutContainer {
     TabItem longText = new TabItem("Настройки");
 //    longText.addStyleName("pad-text");
     longText.addText(txt + "<br>" + txt);  
-    folder.add(longText);  
-  
+    folder.add(longText);
+
+    TabItem datePickerGxt4 = new TabItem("История");
+    datePickerGxt4.add(Widget.asWidgetOrNull(new DatePickerHolder()));
+    folder.add(datePickerGxt4);
 //    TabPanel panel = new TabPanel();
 //    panel.setPlain(true);
 //    panel.setSize(450, 250);
