@@ -14,7 +14,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.RequestBuilder;  
 import com.google.gwt.user.client.Element;  
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.widget.core.client.container.AccordionLayoutContainer;
 
 public class BasicTabExample extends LayoutContainer {
 
@@ -50,7 +52,8 @@ public class BasicTabExample extends LayoutContainer {
     folder.add(longText);
 
     TabItem datePickerGxt4 = new TabItem("История");
-    datePickerGxt4.add(Widget.asWidgetOrNull(new DatePickerHolder()));
+    AccordionLayoutExample accordionLayoutExample = new AccordionLayoutExample();
+    datePickerGxt4.add(Widget.asWidgetOrNull(accordionLayoutExample));
     folder.add(datePickerGxt4);
 //    TabPanel panel = new TabPanel();
 //    panel.setPlain(true);
