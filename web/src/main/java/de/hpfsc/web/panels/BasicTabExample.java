@@ -51,7 +51,7 @@ public class BasicTabExample extends LayoutContainer {
     longText.addText(txt + "<br>" + txt);  
     folder.add(longText);
 
-    TabItem datePickerGxt4 = new TabItem("История");
+    TabItem datePickerGxt4 = new TabItem("Gxt4");
     AccordionLayoutExample accordionLayoutExample = new AccordionLayoutExample();
     datePickerGxt4.add(Widget.asWidgetOrNull(accordionLayoutExample));
     folder.add(datePickerGxt4);
